@@ -24,6 +24,10 @@
    Do not modify this value. */
 #define THREAD_BASIC 0xd42df210
 
+/** project1-Alarm Clock */
+static struct list sleep_list;
+static int64_t next_tick_to_awake;
+
 /* List of processes in THREAD_READY state, that is, processes
    that are ready to run but not actually running. */
 static struct list ready_list;
