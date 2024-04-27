@@ -593,3 +593,28 @@ allocate_tid (void) {
 
 	return tid;
 }
+
+/** project1-Alarm Clock */
+void 
+thread_sleep (int64_t ticks) 
+{
+    struct thread *this;
+    this = thread_current();
+
+    if (this == idle_thread) // idle -> stop
+	{  
+        ASSERT(0);
+    } else 
+	{
+        enum intr_level old_level;
+        old_level = intr_disable();  // pause interrupt
+
+        update_next_tick_to_awake(this->wakeup_tick = ticks);  // update awake ticks
+
+        list_push_back(&sleep_list, &this->elem);  // push to sleep_list
+
+        thread_block();  // block this thread
+
+        intr_set_level(old_level);  // continue interrupt
+    }
+}
