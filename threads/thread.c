@@ -24,6 +24,10 @@
    Do not modify this value. */
 #define THREAD_BASIC 0xd42df210
 
+/** project1-Alarm Clock */
+static struct list sleep_list;
+static int64_t next_tick_to_awake;
+
 /* List of processes in THREAD_READY state, that is, processes
    that are ready to run but not actually running. */
 static struct list ready_list;
@@ -109,6 +113,7 @@ thread_init (void) {
 	lock_init (&tid_lock);
 	list_init (&ready_list);
 	list_init (&destruction_req);
+	list_init (&sleep_list); /** project1-Alarm Clock */
 
 	/* Set up a thread structure for the running thread. */
 	initial_thread = running_thread ();
@@ -588,3 +593,69 @@ allocate_tid (void) {
 
 	return tid;
 }
+
+/** project1-Alarm Clock */
+void 
+thread_sleep (int64_t ticks) 
+{
+    struct thread *this;
+    this = thread_current();
+
+    if (this == idle_thread) // idle -> stop
+	{  
+        ASSERT(0);
+    } else 
+	{
+        enum intr_level old_level;
+        old_level = intr_disable();  // pause interrupt
+
+        update_next_tick_to_awake(this->wakeup_tick = ticks);  // update awake ticks
+
+        list_push_back(&sleep_list, &this->elem);  // push to sleep_list
+
+        thread_block();  // block this thread
+
+        intr_set_level(old_level);  // continue interrupt
+    }
+}
+
+/** project1-Alarm Clock */
+void 
+thread_awake (int64_t wakeup_tick) 
+{
+    next_tick_to_awake = INT64_MAX;
+
+    struct list_elem *sleeping;
+    sleeping = list_begin(&sleep_list);  // take sleeping thread
+
+    while (sleeping != list_end(&sleep_list)) {  // for all sleeping threads
+        struct thread *th = list_entry(sleeping, struct thread, elem);
+
+        if (wakeup_tick >= th->wakeup_tick) 
+		{
+            sleeping = list_remove(&th->elem);  // delete thread
+            thread_unblock(th);                 // unblock thread
+        } 
+		else 
+		{
+            sleeping = list_next(sleeping);              // move to next sleeping thread
+            update_next_tick_to_awake(th->wakeup_tick);  // update wakeup_tick
+        }
+    }
+}
+
+/** project1-Alarm Clock */
+void 
+update_next_tick_to_awake (int64_t ticks) 
+{
+	// find smallest tick
+    next_tick_to_awake = (next_tick_to_awake > ticks) ? ticks : next_tick_to_awake;
+}
+
+/** project1-Alarm Clock */
+int64_t
+get_next_tick_to_awake(void)
+{
+	return next_tick_to_awake;
+}
+
