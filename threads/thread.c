@@ -669,3 +669,28 @@ get_next_tick_to_awake(void)
 	return next_tick_to_awake;
 }
 
+/** project1-Priority Scheduling */
+void 
+test_max_priority (void) 
+{
+    if (list_empty(&ready_list))
+        return;
+
+    struct thread *th = list_entry(list_front(&ready_list), struct thread, elem);
+
+    if (thread_get_priority() < th->priority)
+        thread_yield();
+}
+
+/** project1-Priority Scheduling */
+bool 
+cmp_priority (const struct list_elem *a, const struct list_elem *b, void *aux UNUSED) 
+{
+    struct thread*thread_a = list_entry(a, struct thread, elem);
+    struct thread*thread_b = list_entry(b, struct thread, elem);
+
+	if (thread_a == NULL || thread_b == NULL)
+		return false;
+
+    return thread_a->priority > thread_b->priority;
+}
