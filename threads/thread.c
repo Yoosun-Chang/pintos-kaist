@@ -324,7 +324,13 @@ thread_yield (void) {
 /* Sets the current thread's priority to NEW_PRIORITY. */
 void
 thread_set_priority (int new_priority) {
-	thread_current ()->priority = new_priority;
+
+	/** project1-Priority Inversion Problem */
+    thread_current()->original_priority = new_priority;
+	
+	/** project1-Priority Inversion Problem */
+    refresh_priority();
+
 	/** project1-Priority Scheduling */
 	test_max_priority();
 }
