@@ -716,3 +716,21 @@ donate_priority()
         t->priority = priority;
     }
 }
+
+/** project1-Priority Inversion Problem */
+void remove_with_lock(struct lock *lock) 
+{
+    struct thread *t = thread_current();
+    struct list_elem *curr = list_begin(&t->donations);
+    struct thread *curr_thread = NULL;
+
+    while (curr != list_end(&t->donations)) 
+	{
+        curr_thread = list_entry(curr, struct thread, donation_elem);
+
+        if (curr_thread->wait_lock == lock)
+            list_remove(&curr_thread->donation_elem);
+
+        curr = list_next(curr);
+    }
+}
