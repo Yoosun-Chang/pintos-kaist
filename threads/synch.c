@@ -113,7 +113,7 @@ sema_up (struct semaphore *sema) {
 	old_level = intr_disable ();
 	if (!list_empty (&sema->waiters)){
 		/** project1-Synchronization */
-		list_insert_ordered(&sema->waiters, &thread_current()->elem, cmp_priority, NULL);
+        list_sort(&sema->waiters, cmp_priority, NULL);
 		thread_unblock (list_entry (list_pop_front (&sema->waiters),
 					struct thread, elem));
 	}
