@@ -699,3 +699,20 @@ cmp_priority (const struct list_elem *a, const struct list_elem *b, void *aux UN
 
     return thread_a->priority > thread_b->priority;
 }
+
+/** project1-Priority Inversion Problem */
+void 
+donate_priority() 
+{
+    struct thread *t = thread_current();
+    int priority = t->priority;
+
+    for (int depth = 0; depth < 8; depth++) 
+	{
+        if (t->wait_lock == NULL)
+            break;
+
+        t = t->wait_lock->holder;
+        t->priority = priority;
+    }
+}
