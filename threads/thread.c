@@ -734,3 +734,21 @@ void remove_with_lock(struct lock *lock)
         curr = list_next(curr);
     }
 }
+
+/** project1-Priority Inversion Problem */
+void refresh_priority(void) 
+{
+    struct thread *t = thread_current();
+    t->priority = t->original_priority;
+
+    if (list_empty(&t->donations))
+        return;
+
+    list_sort(&t->donations, cmp_priority, NULL);
+
+    struct list_elem *max_elem = list_front(&t->donations);
+    struct thread *max_thread = list_entry(max_elem, struct thread, donation_elem);
+
+    if (t->priority < max_thread->priority)
+        t->priority = max_thread->priority;
+}
