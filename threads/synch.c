@@ -202,7 +202,9 @@ lock_acquire (struct lock *lock) {
     if (lock->holder != NULL) {
         t->wait_lock = lock;
         list_push_back(&lock->holder->donations, &t->donation_elem);
-        donate_priority();
+        /** project1-Advanced Scheduler */
+        if (!thread_mlfqs)
+            donate_priority();
     }
 
 	sema_down (&lock->semaphore);
