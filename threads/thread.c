@@ -829,3 +829,32 @@ mlfqs_increment (void)
 
     thread_current()->recent_cpu = add_mixed(thread_current()->recent_cpu, 1);
 }
+
+/** project1-Advanced Scheduler */
+void 
+mlfqs_recalc_recent_cpu (void) 
+{
+    struct list_elem *e = list_begin(&all_list);
+    struct thread *t = NULL;
+
+    while (e != list_end(&all_list)) {
+        t = list_entry(e, struct thread, all_elem);
+        mlfqs_recent_cpu(t);
+
+        e = list_next(e);
+    }
+}
+
+/** project1-Advanced Scheduler */
+void mlfqs_recalc_priority (void) 
+{
+    struct list_elem *e = list_begin(&all_list);
+    struct thread *t = NULL;
+
+    while (e != list_end(&all_list)) {
+        t = list_entry(e, struct thread, all_elem);
+        mlfqs_priority(t);
+
+        e = list_next(e);
+    }
+}
