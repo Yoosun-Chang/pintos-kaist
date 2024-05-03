@@ -805,3 +805,17 @@ mlfqs_recent_cpu (struct thread *t)
 
     t->recent_cpu = add_mixed(mult_fp(div_fp(mult_mixed(load_avg, 2), add_mixed(mult_mixed(load_avg, 2), 1)), t->recent_cpu), t->niceness);
 }
+
+/** project1-Advanced Scheduler */
+void 
+mlfqs_load_avg (void) 
+{
+    int ready_threads;
+
+    ready_threads = list_size(&ready_list);
+
+    if (thread_current() != idle_thread)
+        ready_threads++;
+
+    load_avg = add_fp(mult_fp(div_fp(int_to_fp(59), int_to_fp(60)), load_avg), mult_mixed(div_fp(int_to_fp(1), int_to_fp(60)), ready_threads));
+}
