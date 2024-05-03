@@ -795,3 +795,13 @@ mlfqs_priority (struct thread *t)
 
     t->priority = fp_to_int(add_mixed(div_mixed(t->recent_cpu, -4), PRI_MAX - t->niceness * 2));
 }
+
+/** project1-Advanced Scheduler */
+void 
+mlfqs_recent_cpu (struct thread *t) 
+{
+    if (t == idle_thread)
+        return;
+
+    t->recent_cpu = add_mixed(mult_fp(div_fp(mult_mixed(load_avg, 2), add_mixed(mult_mixed(load_avg, 2), 1)), t->recent_cpu), t->niceness);
+}
