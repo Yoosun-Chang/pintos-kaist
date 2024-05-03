@@ -341,6 +341,10 @@ thread_yield (void) {
 void
 thread_set_priority (int new_priority) {
 
+	/** project1-Advanced Scheduler */
+	if (thread_mlfqs)
+        return;
+
 	/** project1-Priority Inversion Problem */
     thread_current()->original_priority = new_priority;
 	
