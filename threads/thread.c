@@ -143,7 +143,7 @@ thread_start (void) {
 	struct semaphore idle_started;
 	sema_init (&idle_started, 0);
 	thread_create ("idle", PRI_MIN, idle, &idle_started);
-	
+
 	/** project1-Advanced Scheduler */
 	load_avg = LOAD_AVG_DEFAULT;
 
@@ -784,4 +784,14 @@ void refresh_priority(void)
 
     if (t->priority < max_thread->priority)
         t->priority = max_thread->priority;
+}
+
+/** project1-Advanced Scheduler */
+void 
+mlfqs_priority (struct thread *t) 
+{
+    if (t == idle_thread)
+        return;
+
+    t->priority = fp_to_int(add_mixed(div_mixed(t->recent_cpu, -4), PRI_MAX - t->niceness * 2));
 }
