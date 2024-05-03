@@ -24,6 +24,10 @@
    Do not modify this value. */
 #define THREAD_BASIC 0xd42df210
 
+/** project1-Alarm Clock */
+static struct list sleep_list;
+static int64_t next_tick_to_awake;
+
 /* List of processes in THREAD_READY state, that is, processes
    that are ready to run but not actually running. */
 static struct list ready_list;
@@ -109,6 +113,7 @@ thread_init (void) {
 	lock_init (&tid_lock);
 	list_init (&ready_list);
 	list_init (&destruction_req);
+	list_init (&sleep_list); /** project1-Alarm Clock */
 
 	/* Set up a thread structure for the running thread. */
 	initial_thread = running_thread ();
@@ -207,6 +212,10 @@ thread_create (const char *name, int priority,
 	/* Add to run queue. */
 	thread_unblock (t);
 
+	/** project1-Priority Scheduling */
+	if(t->priority > thread_current()->priority)
+		thread_yield();
+
 	return tid;
 }
 
@@ -240,7 +249,9 @@ thread_unblock (struct thread *t) {
 
 	old_level = intr_disable ();
 	ASSERT (t->status == THREAD_BLOCKED);
-	list_push_back (&ready_list, &t->elem);
+	/** project1-Priority Scheduling */
+	list_insert_ordered(&ready_list, &t->elem, cmp_priority, NULL);
+	//list_push_back (&ready_list, &t->elem);
 	t->status = THREAD_READY;
 	intr_set_level (old_level);
 }
@@ -303,7 +314,9 @@ thread_yield (void) {
 
 	old_level = intr_disable ();
 	if (curr != idle_thread)
-		list_push_back (&ready_list, &curr->elem);
+		//list_push_back (&ready_list, &curr->elem);
+		/** project1-Priority Scheduling */
+		list_insert_ordered(&ready_list, &curr->elem, cmp_priority, NULL);
 	do_schedule (THREAD_READY);
 	intr_set_level (old_level);
 }
@@ -311,7 +324,15 @@ thread_yield (void) {
 /* Sets the current thread's priority to NEW_PRIORITY. */
 void
 thread_set_priority (int new_priority) {
-	thread_current ()->priority = new_priority;
+
+	/** project1-Priority Inversion Problem */
+    thread_current()->original_priority = new_priority;
+	
+	/** project1-Priority Inversion Problem */
+    refresh_priority();
+
+	/** project1-Priority Scheduling */
+	test_max_priority();
 }
 
 /* Returns the current thread's priority. */
@@ -407,7 +428,12 @@ init_thread (struct thread *t, const char *name, int priority) {
 	t->status = THREAD_BLOCKED;
 	strlcpy (t->name, name, sizeof t->name);
 	t->tf.rsp = (uint64_t) t + PGSIZE - sizeof (void *);
-	t->priority = priority;
+
+	/** project1-Priority Inversion Problem */
+    t->priority = t->original_priority = priority;
+    list_init(&t->donations);
+    t->wait_lock = NULL;
+
 	t->magic = THREAD_MAGIC;
 }
 
@@ -587,4 +613,148 @@ allocate_tid (void) {
 	lock_release (&tid_lock);
 
 	return tid;
+}
+
+/** project1-Alarm Clock */
+void 
+thread_sleep (int64_t ticks) 
+{
+    struct thread *this;
+    this = thread_current();
+
+    if (this == idle_thread) // idle -> stop
+	{  
+        ASSERT(0);
+    } else 
+	{
+        enum intr_level old_level;
+        old_level = intr_disable();  // pause interrupt
+
+        update_next_tick_to_awake(this->wakeup_tick = ticks);  // update awake ticks
+
+        list_push_back(&sleep_list, &this->elem);  // push to sleep_list
+
+        thread_block();  // block this thread
+
+        intr_set_level(old_level);  // continue interrupt
+    }
+}
+
+/** project1-Alarm Clock */
+void 
+thread_awake (int64_t wakeup_tick) 
+{
+    next_tick_to_awake = INT64_MAX;
+
+    struct list_elem *sleeping;
+    sleeping = list_begin(&sleep_list);  // take sleeping thread
+
+    while (sleeping != list_end(&sleep_list)) {  // for all sleeping threads
+        struct thread *th = list_entry(sleeping, struct thread, elem);
+
+        if (wakeup_tick >= th->wakeup_tick) 
+		{
+            sleeping = list_remove(&th->elem);  // delete thread
+            thread_unblock(th);                 // unblock thread
+        } 
+		else 
+		{
+            sleeping = list_next(sleeping);              // move to next sleeping thread
+            update_next_tick_to_awake(th->wakeup_tick);  // update wakeup_tick
+        }
+    }
+}
+
+/** project1-Alarm Clock */
+void 
+update_next_tick_to_awake (int64_t ticks) 
+{
+	// find smallest tick
+    next_tick_to_awake = (next_tick_to_awake > ticks) ? ticks : next_tick_to_awake;
+}
+
+/** project1-Alarm Clock */
+int64_t
+get_next_tick_to_awake(void)
+{
+	return next_tick_to_awake;
+}
+
+/** project1-Priority Scheduling */
+void 
+test_max_priority (void) 
+{
+    if (list_empty(&ready_list))
+        return;
+
+    struct thread *th = list_entry(list_front(&ready_list), struct thread, elem);
+
+    if (thread_get_priority() < th->priority)
+        thread_yield();
+}
+
+/** project1-Priority Scheduling */
+bool 
+cmp_priority (const struct list_elem *a, const struct list_elem *b, void *aux UNUSED) 
+{
+    struct thread*thread_a = list_entry(a, struct thread, elem);
+    struct thread*thread_b = list_entry(b, struct thread, elem);
+
+	if (thread_a == NULL || thread_b == NULL)
+		return false;
+
+    return thread_a->priority > thread_b->priority;
+}
+
+/** project1-Priority Inversion Problem */
+void 
+donate_priority() 
+{
+    struct thread *t = thread_current();
+    int priority = t->priority;
+
+    for (int depth = 0; depth < 8; depth++) 
+	{
+        if (t->wait_lock == NULL)
+            break;
+
+        t = t->wait_lock->holder;
+        t->priority = priority;
+    }
+}
+
+/** project1-Priority Inversion Problem */
+void remove_with_lock(struct lock *lock) 
+{
+    struct thread *t = thread_current();
+    struct list_elem *curr = list_begin(&t->donations);
+    struct thread *curr_thread = NULL;
+
+    while (curr != list_end(&t->donations)) 
+	{
+        curr_thread = list_entry(curr, struct thread, donation_elem);
+
+        if (curr_thread->wait_lock == lock)
+            list_remove(&curr_thread->donation_elem);
+
+        curr = list_next(curr);
+    }
+}
+
+/** project1-Priority Inversion Problem */
+void refresh_priority(void) 
+{
+    struct thread *t = thread_current();
+    t->priority = t->original_priority;
+
+    if (list_empty(&t->donations))
+        return;
+
+    list_sort(&t->donations, cmp_priority, NULL);
+
+    struct list_elem *max_elem = list_front(&t->donations);
+    struct thread *max_thread = list_entry(max_elem, struct thread, donation_elem);
+
+    if (t->priority < max_thread->priority)
+        t->priority = max_thread->priority;
 }
