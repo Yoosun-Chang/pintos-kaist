@@ -32,6 +32,9 @@ static int64_t next_tick_to_awake;
    that are ready to run but not actually running. */
 static struct list ready_list;
 
+/** project1-Advanced Scheduler */
+static struct list all_list;
+
 /* Idle thread. */
 static struct thread *idle_thread;
 
@@ -114,10 +117,16 @@ thread_init (void) {
 	list_init (&ready_list);
 	list_init (&destruction_req);
 	list_init (&sleep_list); /** project1-Alarm Clock */
+	list_init(&all_list); /** project1-Advanced Scheduler */
 
 	/* Set up a thread structure for the running thread. */
 	initial_thread = running_thread ();
 	init_thread (initial_thread, "main", PRI_DEFAULT);
+
+	/** project1-Advanced Scheduler */
+	if (thread_mlfqs)
+	list_push_back(&all_list, &(initial_thread->all_elem));
+
 	initial_thread->status = THREAD_RUNNING;
 	initial_thread->tid = allocate_tid ();
 }
