@@ -145,6 +145,14 @@ void donate_priority(void);
 void remove_with_lock(struct lock *lock);
 void refresh_priority(void);
 
+/** project1-Advanced Scheduler */
+void mlfqs_priority(struct thread *t);
+void mlfqs_recent_cpu(struct thread *t);
+void mlfqs_load_avg(void);
+void mlfqs_increment(void);
+void mlfqs_recalc_recent_cpu(void);
+void mlfqs_recalc_priority(void);
+
 void thread_init (void);
 void thread_start (void);
 
