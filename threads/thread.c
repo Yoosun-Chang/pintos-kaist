@@ -311,7 +311,9 @@ thread_exit (void) {
 #ifdef USERPROG
 	process_exit ();
 #endif
-
+	/** project1-Advanced Scheduler */
+	if (thread_mlfqs)
+        list_remove(&thread_current()->all_elem);
 	/* Just set our status to dying and schedule another process.
 	   We will be destroyed during the call to schedule_tail(). */
 	intr_disable ();
