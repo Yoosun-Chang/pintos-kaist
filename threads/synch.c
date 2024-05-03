@@ -246,9 +246,13 @@ lock_release (struct lock *lock) {
 
 	lock->holder = NULL;
 
-   /** project1-Priority Inversion Problem */
-   remove_with_lock(lock);
-   refresh_priority();
+   /** project1-Advanced Scheduler */
+   if (!thread_mlfqs) 
+   {
+      /** project1-Priority Inversion Problem */
+      remove_with_lock(lock);
+      refresh_priority();
+   }
 
 	sema_up (&lock->semaphore);
 }
