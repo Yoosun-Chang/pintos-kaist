@@ -438,12 +438,23 @@ init_thread (struct thread *t, const char *name, int priority) {
 	strlcpy (t->name, name, sizeof t->name);
 	t->tf.rsp = (uint64_t) t + PGSIZE - sizeof (void *);
 
-	/** project1-Priority Inversion Problem */
-    t->priority = t->original_priority = priority;
-    list_init(&t->donations);
-    t->wait_lock = NULL;
+	/** project1-Advanced Scheduler */
+    if (thread_mlfqs) {
+        mlfqs_priority(t);
+        list_push_back(&all_list, &t->all_elem);
+    } else {
+        t->priority = priority;
+    }
 
-	t->magic = THREAD_MAGIC;
+    t->wait_lock = NULL;
+    list_init(&t->donations);
+
+    t->magic = THREAD_MAGIC;
+
+    /** #Advanced Scheduler */
+    t->original_priority = t->priority;
+    t->niceness = NICE_DEFAULT;
+    t->recent_cpu = RECENT_CPU_DEFAULT;
 }
 
 /* Chooses and returns the next thread to be scheduled.  Should
