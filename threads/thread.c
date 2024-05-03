@@ -11,6 +11,7 @@
 #include "threads/synch.h"
 #include "threads/vaddr.h"
 #include "intrinsic.h"
+#include "threads/fixed_point.h" /** project1-Advanced Scheduler */
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
@@ -60,6 +61,9 @@ static unsigned thread_ticks;   /* # of timer ticks since last yield. */
    If true, use multi-level feedback queue scheduler.
    Controlled by kernel command-line option "-o mlfqs". */
 bool thread_mlfqs;
+
+/** project1-Advanced Scheduler */
+int load_avg;
 
 static void kernel_thread (thread_func *, void *aux);
 
@@ -139,6 +143,9 @@ thread_start (void) {
 	struct semaphore idle_started;
 	sema_init (&idle_started, 0);
 	thread_create ("idle", PRI_MIN, idle, &idle_started);
+	
+	/** project1-Advanced Scheduler */
+	load_avg = LOAD_AVG_DEFAULT;
 
 	/* Start preemptive thread scheduling. */
 	intr_enable ();
