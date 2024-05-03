@@ -129,7 +129,7 @@ thread_init (void) {
 
 	/** project1-Advanced Scheduler */
 	if (thread_mlfqs)
-	list_push_back(&all_list, &(initial_thread->all_elem));
+		list_push_back(&all_list, &(initial_thread->all_elem));
 
 	initial_thread->status = THREAD_RUNNING;
 	initial_thread->tid = allocate_tid ();
