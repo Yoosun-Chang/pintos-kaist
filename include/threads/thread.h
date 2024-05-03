@@ -28,6 +28,11 @@ typedef int tid_t;
 #define PRI_DEFAULT 31                  /* Default priority. */
 #define PRI_MAX 63                      /* Highest priority. */
 
+/** project1-Advanced Scheduler */
+#define NICE_DEFAULT 0
+#define RECENT_CPU_DEFAULT 0
+#define LOAD_AVG_DEFAULT 0
+
 /* A kernel thread or user process.
  *
  * Each thread structure is stored in its own 4 kB page.  The
@@ -101,6 +106,10 @@ struct thread {
     struct lock *wait_lock;
     struct list donations;
     struct list_elem donation_elem;
+
+	/** project1-Advanced Scheduler */
+	int nice;
+	int recent_cpu;
 
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */
