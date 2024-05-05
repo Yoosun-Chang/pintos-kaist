@@ -648,3 +648,34 @@ setup_stack (struct intr_frame *if_) {
 	return success;
 }
 #endif /* VM */
+
+/** project2-Command Line Parsing */
+// 유저 스택에 파싱된 토큰을 저장하는 함수
+void argument_stack(char **argv, int argc, struct intr_frame *if_) {
+    char *arg_addr[100];
+    int argv_len;
+
+    for (int i = argc - 1; i >= 0; i--) {
+        argv_len = strlen(argv[i]) + 1;
+        if_->rsp -= argv_len;
+        memcpy(if_->rsp, argv[i], argv_len);
+        arg_addr[i] = if_->rsp;
+    }
+
+    while (!(if_->rsp % 8))
+        *(uint8_t *)(--if_->rsp) = 0;
+
+    for (int i = argc; i >= 0; i--) {
+        if_->rsp = if_->rsp - 8;
+        if (i == argc)
+            memset(if_->rsp, 0, sizeof(char **));
+        else
+            memcpy(if_->rsp, &arg_addr[i], sizeof(char **));
+    }
+
+    if_->rsp = if_->rsp - 8;
+    memset(if_->rsp, 0, sizeof(void *));
+
+    if_->R.rdi = argc;
+    if_->R.rsi = if_->rsp + 8;
+}
