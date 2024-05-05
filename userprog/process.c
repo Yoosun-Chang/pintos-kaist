@@ -176,8 +176,19 @@ process_exec (void *f_name) {
 	/* We first kill the current context */
 	process_cleanup ();
 
+	/** project2-Command Line Parsing */
+	char *ptr, *arg;
+    int arg_cnt = 0;
+    char *arg_list[32];
+
+    for (arg = strtok_r(file_name, " ", &ptr); arg != NULL; arg = strtok_r(NULL, " ", &ptr))
+        arg_list[arg_cnt++] = arg;
+
 	/* And then load the binary */
 	success = load (file_name, &_if);
+
+	/** project2-Command Line Parsing */
+	argument_stack(arg_list, arg_cnt, &_if);
 
 	/* If load failed, quit. */
 	palloc_free_page (file_name);
