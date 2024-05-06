@@ -111,6 +111,9 @@ struct thread {
 	int niceness;
 	int recent_cpu;
 	struct list_elem all_elem;
+	
+	/** project2-System Call */
+	int exit_status;
 
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */

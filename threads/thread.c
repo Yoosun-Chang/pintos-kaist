@@ -491,6 +491,9 @@ init_thread (struct thread *t, const char *name, int priority) {
     t->original_priority = t->priority;
     t->niceness = NICE_DEFAULT;
     t->recent_cpu = RECENT_CPU_DEFAULT;
+
+	/** project2-System Call */
+	t->exit_status = 0;
 }
 
 /* Chooses and returns the next thread to be scheduled.  Should
