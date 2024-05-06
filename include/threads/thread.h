@@ -9,6 +9,7 @@
 #include "vm/vm.h"
 #endif
 
+#define USERPROG
 
 /* States in a thread's life cycle. */
 enum thread_status {
@@ -112,14 +113,14 @@ struct thread {
 	int recent_cpu;
 	struct list_elem all_elem;
 	
-	/** project2-System Call */
-	uint64_t *pml4;
-	int exit_status;
 
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */
 	uint64_t *pml4;                     /* Page map level 4 */
+	/** project2-System Call */
+	int exit_status;
 #endif
+
 #ifdef VM
 	/* Table for whole virtual memory owned by thread. */
 	struct supplemental_page_table spt;
