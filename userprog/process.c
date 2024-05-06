@@ -668,7 +668,7 @@ void argument_stack(char **argv, int argc, struct intr_frame *if_) {
         arg_addr[i] = if_->rsp;
     }
 
-    while (!(if_->rsp % 8))
+    while (if_->rsp % 8)
         *(uint8_t *)(--if_->rsp) = 0;
 
     for (int i = argc; i >= 0; i--) {
