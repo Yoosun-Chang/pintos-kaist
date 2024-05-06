@@ -110,3 +110,12 @@ halt(void)
 {
     power_off();
 }
+
+void 
+exit(int status) 
+{
+    struct thread *t = thread_current();
+    t->exit_status = status;
+    printf("%s: exit(%d)\n", t->name, t->exit_status);
+    thread_exit();
+}
