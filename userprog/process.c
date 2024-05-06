@@ -671,12 +671,12 @@ void argument_stack(char **argv, int argc, struct intr_frame *if_) {
     while (if_->rsp % 8)
         *(uint8_t *)(--if_->rsp) = 0;
 
-    for (int i = argc; i >= 0; i--) {
-        if_->rsp = if_->rsp - 8;
-        if (i == argc)
-            memset(if_->rsp, 0, sizeof(char **));
-        else
-            memcpy(if_->rsp, &arg_addr[i], sizeof(char **));
+    if_->rsp -= 8;
+    memset(if_->rsp, 0, sizeof(char *));
+
+    for (int i = argc - 1; i >= 0; i--) {
+        if_->rsp -= 8;
+        memcpy(if_->rsp, &arg_addr[i], sizeof(char *));
     }
 
     if_->rsp = if_->rsp - 8;
