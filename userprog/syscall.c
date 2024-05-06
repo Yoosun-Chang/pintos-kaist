@@ -104,3 +104,9 @@ check_address (void *addr)
 	if(is_user_vaddr(addr))
 		exit(-1);
 }
+
+void 
+halt(void) 
+{
+    power_off();
+}
