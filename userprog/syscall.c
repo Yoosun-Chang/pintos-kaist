@@ -55,37 +55,37 @@ syscall_handler (struct intr_frame *f UNUSED) {
             exit(f->R.rdi);
             break;
         case SYS_FORK:
-            fork(f->R.rdi);
+            f->R.rax = fork(f->R.rdi, f);
             break;
         case SYS_EXEC:
-            exec(f->R.rdi);
+            f->R.rax = exec(f->R.rdi);
             break;
         case SYS_WAIT:
-            process_wait(f->R.rdi);
+            f->R.rax = process_wait(f->R.rdi);
             break;
         case SYS_CREATE:
-            create(f->R.rdi, f->R.rsi);
+            f->R.rax = create(f->R.rdi, f->R.rsi);
             break;
         case SYS_REMOVE:
-            remove(f->R.rdi);
+            f->R.rax = remove(f->R.rdi);
             break;
         case SYS_OPEN:
-            open(f->R.rdi);
+            f->R.rax = open(f->R.rdi);
             break;
         case SYS_FILESIZE:
-            filesize(f->R.rdi);
+            f->R.rax = filesize(f->R.rdi);
             break;
         case SYS_READ:
-            read(f->R.rdi, f->R.rsi, f->R.rdx);
+            f->R.rax = read(f->R.rdi, f->R.rsi, f->R.rdx);
             break;
         case SYS_WRITE:
-            write(f->R.rdi, f->R.rsi, f->R.rdx);
+            f->R.rax = write(f->R.rdi, f->R.rsi, f->R.rdx);
             break;
         case SYS_SEEK:
             seek(f->R.rdi, f->R.rsi);
             break;
         case SYS_TELL:
-            tell(f->R.rdi);
+            f->R.rax = tell(f->R.rdi);
             break;
         case SYS_CLOSE:
             close(f->R.rdi);
@@ -94,7 +94,6 @@ syscall_handler (struct intr_frame *f UNUSED) {
         default:
             exit(-1);
     }
-    //thread_exit();
 }
 
 /** project2-System Call */
