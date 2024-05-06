@@ -100,8 +100,8 @@ syscall_handler (struct intr_frame *f UNUSED) {
 void 
 check_address (void *addr)
 {
-	if(is_user_vaddr(addr))
-		exit(-1);
+    if (is_kernel_vaddr(addr) || addr == NULL || pml4_get_page(thread_current()->pml4, addr) == NULL)
+        exit(-1);
 }
 
 void 
