@@ -176,13 +176,26 @@ process_exec (void *f_name) {
 	/* We first kill the current context */
 	process_cleanup ();
 
+	/** project2-Command Line Parsing */
+	char *ptr, *arg;
+    int arg_cnt = 0;
+    char *arg_list[32];
+
+    for (arg = strtok_r(file_name, " ", &ptr); arg != NULL; arg = strtok_r(NULL, " ", &ptr))
+        arg_list[arg_cnt++] = arg;
+
 	/* And then load the binary */
 	success = load (file_name, &_if);
+
+	/** project2-Command Line Parsing */
+	argument_stack(arg_list, arg_cnt, &_if);
 
 	/* If load failed, quit. */
 	palloc_free_page (file_name);
 	if (!success)
 		return -1;
+	
+    hex_dump(_if.rsp, _if.rsp, USER_STACK - _if.rsp, true); // 0x47480000	
 
 	/* Start switched process. */
 	do_iret (&_if);
@@ -204,6 +217,10 @@ process_wait (tid_t child_tid UNUSED) {
 	/* XXX: Hint) The pintos exit if process_wait (initd), we recommend you
 	 * XXX:       to add infinite loop here before
 	 * XXX:       implementing the process_wait. */
+
+	/** project2-Command Line Parsing */
+	while (1){}
+
 	return -1;
 }
 
@@ -637,3 +654,34 @@ setup_stack (struct intr_frame *if_) {
 	return success;
 }
 #endif /* VM */
+
+/** project2-Command Line Parsing */
+// 유저 스택에 파싱된 토큰을 저장하는 함수
+void argument_stack(char **argv, int argc, struct intr_frame *if_) {
+    char *arg_addr[100];
+    int argv_len;
+
+    for (int i = argc - 1; i >= 0; i--) {
+        argv_len = strlen(argv[i]) + 1;
+        if_->rsp -= argv_len;
+        memcpy(if_->rsp, argv[i], argv_len);
+        arg_addr[i] = if_->rsp;
+    }
+
+    while (!(if_->rsp % 8))
+        *(uint8_t *)(--if_->rsp) = 0;
+
+    for (int i = argc; i >= 0; i--) {
+        if_->rsp = if_->rsp - 8;
+        if (i == argc)
+            memset(if_->rsp, 0, sizeof(char **));
+        else
+            memcpy(if_->rsp, &arg_addr[i], sizeof(char **));
+    }
+
+    if_->rsp = if_->rsp - 8;
+    memset(if_->rsp, 0, sizeof(void *));
+
+    if_->R.rdi = argc;
+    if_->R.rsi = if_->rsp + 8;
+}
