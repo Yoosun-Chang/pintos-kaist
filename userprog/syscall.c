@@ -8,6 +8,9 @@
 #include "threads/flags.h"
 #include "intrinsic.h"
 
+/** project2-System Call */
+#include "threads/mmu.h"
+
 void syscall_entry (void);
 void syscall_handler (struct intr_frame *);
 
