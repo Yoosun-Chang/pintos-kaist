@@ -113,6 +113,7 @@ struct thread {
 	struct list_elem all_elem;
 	
 	/** project2-System Call */
+	uint64_t *pml4;
 	int exit_status;
 
 #ifdef USERPROG
