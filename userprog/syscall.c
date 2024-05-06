@@ -41,6 +41,7 @@ syscall_init (void) {
 void
 syscall_handler (struct intr_frame *f UNUSED) {
 	// TODO: Your implementation goes here.
+	/** project2-System Call */
     int sys_number = f->R.rax;
 
     // Argument 순서
@@ -94,4 +95,12 @@ syscall_handler (struct intr_frame *f UNUSED) {
             exit(-1);
     }
     thread_exit();
+}
+
+/** project2-System Call */
+void 
+check_address (void *addr)
+{
+	if(is_user_vaddr(addr))
+		exit(-1);
 }
