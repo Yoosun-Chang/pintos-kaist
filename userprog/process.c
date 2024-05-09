@@ -207,46 +207,44 @@ error:
  * Returns -1 on fail. */
 int
 process_exec (void *f_name) {
-	char *file_name = f_name;
-	bool success;
+    char *file_name = f_name;
+    bool success;
 
-	/* We cannot use the intr_frame in the thread structure.
-	 * This is because when current thread rescheduled,
-	 * it stores the execution information to the member. */
-	struct intr_frame _if;
-	_if.ds = _if.es = _if.ss = SEL_UDSEG;
-	_if.cs = SEL_UCSEG;
-	_if.eflags = FLAG_IF | FLAG_MBS;
+    /* 스레드 구조에서는 intr_frame을 사용할 수 없습니다.
+     * 현재 쓰레드가 재스케줄 되면 실행 정보를 멤버에게 저장하기 때문입니다. */
+    struct intr_frame if_;
+    if_.ds = if_.es = if_.ss = SEL_UDSEG;
+    if_.cs = SEL_UCSEG;
+    if_.eflags = FLAG_IF | FLAG_MBS;
 
-	/* We first kill the current context */
-	process_cleanup ();
+    /* We first kill the current context */
+    process_cleanup();
 
-	/** project2-Command Line Parsing */
-	char *ptr, *arg;
-    int arg_cnt = 0;
-    char *arg_list[32];
+    /** #Project 2: Command Line Parsing - 문자열 분리 */
+    char *ptr, *arg;
+    int argc = 0;
+    char *argv[64];
 
     for (arg = strtok_r(file_name, " ", &ptr); arg != NULL; arg = strtok_r(NULL, " ", &ptr))
-        arg_list[arg_cnt++] = arg;
+        argv[argc++] = arg;
 
-	/* And then load the binary */
-	success = load (file_name, &_if);
-	
-	/* If load failed, quit. */
+    /* And then load the binary */
+    success = load(file_name, &if_);
+
+    /* If load failed, quit. */
     if (!success)
         return -1;
 
-	/** project2-Command Line Parsing */
-	argument_stack(arg_list, arg_cnt, &_if);
+    argument_stack(argv, argc, &if_);
 
-	/* If load failed, quit. */
-	palloc_free_page (file_name);
-	
-    //hex_dump(_if.rsp, _if.rsp, USER_STACK - _if.rsp, true);
+    palloc_free_page(file_name);
 
-	/* Start switched process. */
-	do_iret (&_if);
-	NOT_REACHED ();
+    /** #Project 2: Command Line Parsing - 디버깅용 툴 */
+    // hex_dump(if_.rsp, if_.rsp, USER_STACK - if_.rsp, true);
+
+    /* Start switched process. */
+    do_iret(&if_);
+    NOT_REACHED();
 }
 
 
