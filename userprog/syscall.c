@@ -160,6 +160,10 @@ exec(const char *cmd_line)
     return 0;  // process_exec 성공시 리턴 값 없음 (do_iret)
 }
 
+int wait(pid_t tid) {
+    return process_wait(tid);
+}
+
 bool 
 create(const char *file, unsigned initial_size) 
 {
