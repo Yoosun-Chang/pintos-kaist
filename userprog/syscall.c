@@ -150,6 +150,22 @@ remove(const char *file)
 }
 
 int 
+open(const char *file) {
+    check_address(file);
+    struct file *newfile = filesys_open(file);
+
+    if (newfile == NULL)
+        return -1;
+
+    int fd = process_add_file(newfile);
+
+    if (fd == -1)
+        file_close(newfile);
+
+    return fd;
+}
+
+int 
 read(int fd, void *buffer, unsigned length) {
     check_address(buffer);
 
