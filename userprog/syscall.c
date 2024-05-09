@@ -141,6 +141,25 @@ fork(const char *thread_name)
     return process_fork(thread_name, NULL);
 }
 
+int 
+exec(const char *cmd_line) 
+{
+    check_address(cmd_line);
+
+    off_t size = strlen(cmd_line) + 1;
+    char *cmd_copy = palloc_get_page(PAL_ZERO);
+
+    if (cmd_copy == NULL)
+        return -1;
+
+    memcpy(cmd_copy, cmd_line, size);
+
+    if (process_exec(cmd_copy) == -1)
+        return -1;
+
+    return 0;  // process_exec 성공시 리턴 값 없음 (do_iret)
+}
+
 bool 
 create(const char *file, unsigned initial_size) 
 {
