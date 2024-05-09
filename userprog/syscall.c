@@ -10,6 +10,7 @@
 
 /** project2-System Call */
 #include "threads/mmu.h"
+#include <off_t.h>
 
 void syscall_entry (void);
 void syscall_handler (struct intr_frame *);
