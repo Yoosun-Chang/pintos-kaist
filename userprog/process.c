@@ -49,6 +49,10 @@ process_create_initd (const char *file_name) {
 	if (fn_copy == NULL)
 		return TID_ERROR;
 	strlcpy (fn_copy, file_name, PGSIZE);
+	
+    /** project2-System Call */
+	char *ptr;
+    strtok_r(file_name, " ", &ptr);
 
 	/* Create a new thread to execute FILE_NAME. */
 	tid = thread_create (file_name, PRI_DEFAULT, initd, fn_copy);
@@ -176,13 +180,26 @@ process_exec (void *f_name) {
 	/* We first kill the current context */
 	process_cleanup ();
 
+	/** project2-Command Line Parsing */
+	char *ptr, *arg;
+    int arg_cnt = 0;
+    char *arg_list[32];
+
+    for (arg = strtok_r(file_name, " ", &ptr); arg != NULL; arg = strtok_r(NULL, " ", &ptr))
+        arg_list[arg_cnt++] = arg;
+
 	/* And then load the binary */
 	success = load (file_name, &_if);
+
+	/** project2-Command Line Parsing */
+	argument_stack(arg_list, arg_cnt, &_if);
 
 	/* If load failed, quit. */
 	palloc_free_page (file_name);
 	if (!success)
 		return -1;
+	
+    hex_dump(_if.rsp, _if.rsp, USER_STACK - _if.rsp, true); // 0x47480000	
 
 	/* Start switched process. */
 	do_iret (&_if);
@@ -204,6 +221,10 @@ process_wait (tid_t child_tid UNUSED) {
 	/* XXX: Hint) The pintos exit if process_wait (initd), we recommend you
 	 * XXX:       to add infinite loop here before
 	 * XXX:       implementing the process_wait. */
+
+	/** project2-Command Line Parsing */
+	while (1){}
+
 	return -1;
 }
 
@@ -215,6 +236,19 @@ process_exit (void) {
 	 * TODO: Implement process termination message (see
 	 * TODO: project2/process_termination.html).
 	 * TODO: We recommend you to implement process resource cleanup here. */
+
+	    for (int fd = 0; fd < curr->fd_idx; fd++)  // FDT 비우기
+        close(fd);
+
+    file_close(curr->runn_file);  // 현재 프로세스가 실행중인 파일 종료
+
+    palloc_free_multiple(curr->fdt, FDT_PAGES);
+
+    process_cleanup();
+
+    sema_up(&curr->wait_sema);  // 자식 프로세스가 종료될 때까지 대기하는 부모에게 signal
+
+    sema_down(&curr->exit_sema);  // 부모 프로세스가 종료될 떄까지 대기
 
 	process_cleanup ();
 }
@@ -637,3 +671,83 @@ setup_stack (struct intr_frame *if_) {
 	return success;
 }
 #endif /* VM */
+
+/** project2-Command Line Parsing */
+// 유저 스택에 파싱된 토큰을 저장하는 함수
+void argument_stack(char **argv, int argc, struct intr_frame *if_) {
+    char *arg_addr[100];
+    int argv_len;
+
+    for (int i = argc - 1; i >= 0; i--) {
+        argv_len = strlen(argv[i]) + 1;
+        if_->rsp -= argv_len;
+        memcpy(if_->rsp, argv[i], argv_len);
+        arg_addr[i] = if_->rsp;
+    }
+
+    while (if_->rsp % 8)
+        *(uint8_t *)(--if_->rsp) = 0;
+
+    if_->rsp -= 8;
+    memset(if_->rsp, 0, sizeof(char *));
+
+    for (int i = argc - 1; i >= 0; i--) {
+        if_->rsp -= 8;
+        memcpy(if_->rsp, &arg_addr[i], sizeof(char *));
+    }
+
+    if_->rsp = if_->rsp - 8;
+    memset(if_->rsp, 0, sizeof(void *));
+
+    if_->R.rdi = argc;
+    if_->R.rsi = if_->rsp + 8;
+}
+
+/** project2-System Call */
+struct thread *get_child_process(int pid) {
+    struct thread *curr = thread_current();
+    struct thread *t;
+
+    for (struct list_elem *e = list_begin(&curr->child_list); e != list_end(&curr->child_list); e = list_next(e)) {
+        t = list_entry(e, struct thread, child_elem);
+
+        if (pid == t->tid)
+            return t;
+    }
+
+    return NULL;
+}
+
+// 현재 스레드 fdt에 파일 추가
+int process_add_file(struct file *f) {
+    struct thread *curr = thread_current();
+    struct file **fdt = curr->fdt;
+
+    if (curr->fd_idx >= FDCOUNT_LIMIT)
+        return -1;
+
+    fdt[curr->fd_idx++] = f;
+
+    return curr->fd_idx - 1;
+}
+
+// 현재 스레드의 fd번째 파일 정보 얻기
+struct file *process_get_file(int fd) {
+    struct thread *curr = thread_current();
+
+    if (fd >= FDCOUNT_LIMIT)
+        return NULL;
+
+    return curr->fdt[fd];
+}
+
+// 현재 스레드의 fdt에서 파일 삭제
+int process_close_file(int fd) {
+    struct thread *curr = thread_current();
+
+    if (fd >= FDCOUNT_LIMIT)
+        return -1;
+
+    curr->fdt[fd] = NULL;
+    return 0;
+}
