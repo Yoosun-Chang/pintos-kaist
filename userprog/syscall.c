@@ -143,3 +143,38 @@ remove(const char *file)
 
     return filesys_remove(file);
 }
+
+int 
+read(int fd, void *buffer, unsigned length) {
+    check_address(buffer);
+
+    if (fd == 0) {  // 0(stdin) -> keyboard로 직접 입력
+        int i = 0;  // 쓰레기 값 return 방지
+        char c;
+        unsigned char *buf = buffer;
+
+        for (; i < length; i++) {
+            c = input_getc();
+            *buf++ = c;
+            if (c == '\0')
+                break;
+        }
+
+        return i;
+    }
+    // 그 외의 경우
+    if (fd < 3)  // stdout, stderr를 읽으려고 할 경우 & fd가 음수일 경우
+        return -1;
+
+    struct file *file = process_get_file(fd);
+    off_t bytes = -1;
+
+    if (file == NULL)  // 파일이 비어있을 경우
+        return -1;
+
+    lock_acquire(&filesys_lock);
+    bytes = file_read(file, buffer, length);
+    lock_release(&filesys_lock);
+
+    return bytes;
+}
