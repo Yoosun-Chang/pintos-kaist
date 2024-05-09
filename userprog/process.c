@@ -79,9 +79,25 @@ initd (void *f_name) {
  * TID_ERROR if the thread cannot be created. */
 tid_t
 process_fork (const char *name, struct intr_frame *if_ UNUSED) {
-	/* Clone current thread to new thread.*/
-	return thread_create (name,
-			PRI_DEFAULT, __do_fork, thread_current ());
+	struct thread *curr = thread_current();
+
+    struct intr_frame *f = (pg_round_up(rrsp()) - sizeof(struct intr_frame));  // 현재 쓰레드의 if_는 페이지 마지막에 붙어있다.
+    memcpy(&curr->parent_if, f, sizeof(struct intr_frame));                    // 1. 부모를 찾기 위해서 2. do_fork에 전달해주기 위해서
+
+    /* 현재 스레드를 새 스레드로 복제합니다.*/
+    tid_t tid = thread_create(name, PRI_DEFAULT, __do_fork, curr);
+
+    if (tid == TID_ERROR)
+        return TID_ERROR;
+
+    struct thread *child = get_child_process(tid);
+
+    sema_down(&child->fork_sema);  // 생성만 해놓고 자식 프로세스가 __do_fork에서 fork_sema를 sema_up 해줄 때까지 대기
+
+    if (child->exit_status == TID_ERROR)
+        return TID_ERROR;
+
+    return tid;  // 부모 프로세스의 리턴값 : 생성한 자식 프로세스의 tid
 }
 
 #ifndef VM
