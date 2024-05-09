@@ -45,7 +45,7 @@ void
 syscall_handler (struct intr_frame *f UNUSED) {
 	// TODO: Your implementation goes here.
 	/** project2-System Call */
-    int sys_number = f->R.rax;
+int sys_number = f->R.rax;
 
     // Argument 순서
     // %rdi %rsi %rdx %r10 %r8 %r9
@@ -58,7 +58,7 @@ syscall_handler (struct intr_frame *f UNUSED) {
             exit(f->R.rdi);
             break;
         case SYS_FORK:
-            f->R.rax = fork(f->R.rdi, f);
+            f->R.rax = fork(f->R.rdi);
             break;
         case SYS_EXEC:
             f->R.rax = exec(f->R.rdi);
@@ -93,7 +93,6 @@ syscall_handler (struct intr_frame *f UNUSED) {
         case SYS_CLOSE:
             close(f->R.rdi);
             break;
-
         default:
             exit(-1);
     }
