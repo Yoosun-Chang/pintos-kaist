@@ -4,6 +4,10 @@
 void syscall_init (void);
 
 /** project2-System Call */
+
+/* Process identifier. */
+typedef int pid_t;
+
 #include <stdbool.h>
 void check_address(void *addr);
 void halt(void);
