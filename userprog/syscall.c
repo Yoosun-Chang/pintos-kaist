@@ -205,3 +205,13 @@ write(int fd, const void *buffer, unsigned length) {
 
     return bytes;
 }
+
+void 
+seek(int fd, unsigned position) {
+    struct file *file = process_get_file(fd);
+
+    if (fd < 3 || file == NULL)
+        return;
+
+    file_seek(file, position);
+}
