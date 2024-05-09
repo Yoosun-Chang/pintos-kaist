@@ -237,6 +237,19 @@ process_exit (void) {
 	 * TODO: project2/process_termination.html).
 	 * TODO: We recommend you to implement process resource cleanup here. */
 
+	    for (int fd = 0; fd < curr->fd_idx; fd++)  // FDT 비우기
+        close(fd);
+
+    file_close(curr->runn_file);  // 현재 프로세스가 실행중인 파일 종료
+
+    palloc_free_multiple(curr->fdt, FDT_PAGES);
+
+    process_cleanup();
+
+    sema_up(&curr->wait_sema);  // 자식 프로세스가 종료될 때까지 대기하는 부모에게 signal
+
+    sema_down(&curr->exit_sema);  // 부모 프로세스가 종료될 떄까지 대기
+
 	process_cleanup ();
 }
 
