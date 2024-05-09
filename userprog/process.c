@@ -704,3 +704,16 @@ struct thread *get_child_process(int pid) {
 
     return NULL;
 }
+
+// 현재 스레드 fdt에 파일 추가
+int process_add_file(struct file *f) {
+    struct thread *curr = thread_current();
+    struct file **fdt = curr->fdt;
+
+    if (curr->fd_idx >= FDCOUNT_LIMIT)
+        return -1;
+
+    fdt[curr->fd_idx++] = f;
+
+    return curr->fd_idx - 1;
+}
