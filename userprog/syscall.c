@@ -14,7 +14,6 @@
 #include "filesys/filesys.h"
 #include "threads/palloc.h"
 #include "userprog/process.h"
-#include <off_t.h>
 
 void syscall_entry (void);
 void syscall_handler (struct intr_frame *);
