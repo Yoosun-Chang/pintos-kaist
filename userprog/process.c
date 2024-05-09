@@ -717,3 +717,12 @@ int process_add_file(struct file *f) {
 
     return curr->fd_idx - 1;
 }
+
+struct file *process_get_file(int fd) {
+    struct thread *curr = thread_current();
+
+    if (fd >= FDCOUNT_LIMIT)
+        return NULL;
+
+    return curr->fdt[fd];
+}
