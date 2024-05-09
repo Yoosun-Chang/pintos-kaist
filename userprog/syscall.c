@@ -8,6 +8,9 @@
 #include "threads/flags.h"
 #include "intrinsic.h"
 
+/** project2-System Call */
+#include "threads/mmu.h"
+
 void syscall_entry (void);
 void syscall_handler (struct intr_frame *);
 
@@ -41,6 +44,95 @@ syscall_init (void) {
 void
 syscall_handler (struct intr_frame *f UNUSED) {
 	// TODO: Your implementation goes here.
-	printf ("system call!\n");
-	thread_exit ();
+	/** project2-System Call */
+int sys_number = f->R.rax;
+
+    // Argument 순서
+    // %rdi %rsi %rdx %r10 %r8 %r9
+
+    switch (sys_number) {
+        case SYS_HALT:
+            halt();
+            break;
+        case SYS_EXIT:
+            exit(f->R.rdi);
+            break;
+        case SYS_FORK:
+            f->R.rax = fork(f->R.rdi);
+            break;
+        case SYS_EXEC:
+            f->R.rax = exec(f->R.rdi);
+            break;
+        case SYS_WAIT:
+            f->R.rax = process_wait(f->R.rdi);
+            break;
+        case SYS_CREATE:
+            f->R.rax = create(f->R.rdi, f->R.rsi);
+            break;
+        case SYS_REMOVE:
+            f->R.rax = remove(f->R.rdi);
+            break;
+        case SYS_OPEN:
+            f->R.rax = open(f->R.rdi);
+            break;
+        case SYS_FILESIZE:
+            f->R.rax = filesize(f->R.rdi);
+            break;
+        case SYS_READ:
+            f->R.rax = read(f->R.rdi, f->R.rsi, f->R.rdx);
+            break;
+        case SYS_WRITE:
+            f->R.rax = write(f->R.rdi, f->R.rsi, f->R.rdx);
+            break;
+        case SYS_SEEK:
+            seek(f->R.rdi, f->R.rsi);
+            break;
+        case SYS_TELL:
+            f->R.rax = tell(f->R.rdi);
+            break;
+        case SYS_CLOSE:
+            close(f->R.rdi);
+            break;
+        default:
+            exit(-1);
+    }
+}
+
+/** project2-System Call */
+void 
+check_address (void *addr)
+{
+    if (is_kernel_vaddr(addr) || addr == NULL || pml4_get_page(thread_current()->pml4, addr) == NULL)
+        exit(-1);
+}
+
+void 
+halt(void) 
+{
+    power_off();
+}
+
+void 
+exit(int status) 
+{
+    struct thread *t = thread_current();
+    t->exit_status = status;
+    printf("%s: exit(%d)\n", t->name, t->exit_status); // Process Termination Message
+    thread_exit();
+}
+
+bool 
+create(const char *file, unsigned initial_size) 
+{
+    check_address(file);
+
+    return filesys_create(file, initial_size);
+}
+
+bool 
+remove(const char *file) 
+{
+    check_address(file);
+
+    return filesys_remove(file);
 }
