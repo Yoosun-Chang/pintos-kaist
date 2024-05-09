@@ -152,11 +152,12 @@ __do_fork (void *aux) {
 	struct thread *parent = (struct thread *) aux;
 	struct thread *current = thread_current ();
 	/* TODO: somehow pass the parent_if. (i.e. process_fork()'s if_) */
-	struct intr_frame *parent_if;
+	struct intr_frame *parent_if = &parent->parent_if;
 	bool succ = true;
 
 	/* 1. Read the cpu context to local stack. */
 	memcpy (&if_, parent_if, sizeof (struct intr_frame));
+    if_.R.rax = 0;  // 자식 프로세스의 return값 (0)
 
 	/* 2. Duplicate PT */
 	current->pml4 = pml4_create();
@@ -179,13 +180,27 @@ __do_fork (void *aux) {
 	 * TODO:       from the fork() until this function successfully duplicates
 	 * TODO:       the resources of parent.*/
 
-	process_init ();
+    if (parent->fd_idx >= FDCOUNT_LIMIT)
+        goto error;
 
-	/* Finally, switch to the newly created process. */
-	if (succ)
-		do_iret (&if_);
+    current->fd_idx = parent->fd_idx;  // fdt 및 idx 복제
+    for (int fd = 3; fd < parent->fd_idx; fd++) {
+        if (parent->fdt[fd] == NULL)
+            continue;
+        current->fdt[fd] = file_duplicate(parent->fdt[fd]);
+    }
+
+    sema_up(&current->fork_sema);  // fork 프로세스가 정상적으로 완료됐으므로 현재 fork용 sema unblock
+
+    process_init();
+
+    /* Finally, switch to the newly created process. */
+    if (succ)
+        do_iret(&if_);  // 정상 종료 시 자식 Process를 수행하러 감
+
 error:
-	thread_exit ();
+    sema_up(&current->fork_sema);  // 복제에 실패했으므로 현재 fork용 sema unblock
+    exit(TID_ERROR);
 }
 
 /* Switch the current execution context to the f_name.
