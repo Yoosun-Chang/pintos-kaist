@@ -133,6 +133,12 @@ exit(int status)
     thread_exit();
 }
 
+pid_t fork(const char *thread_name) {
+    check_address(thread_name);
+
+    return process_fork(thread_name, NULL);
+}
+
 bool 
 create(const char *file, unsigned initial_size) 
 {
