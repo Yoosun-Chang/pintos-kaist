@@ -227,3 +227,15 @@ tell(int fd) {
 
     return file_tell(file);
 }
+
+void 
+close(int fd) {
+    struct file *file = process_get_file(fd);
+
+    if (fd < 3 || file == NULL)
+        return;
+
+    process_close_file(fd);
+
+    file_close(file);
+}
