@@ -217,3 +217,13 @@ seek(int fd, unsigned position) {
 
     file_seek(file, position);
 }
+
+int 
+tell(int fd) {
+    struct file *file = process_get_file(fd);
+
+    if (fd < 3 || file == NULL)
+        return -1;
+
+    return file_tell(file);
+}
