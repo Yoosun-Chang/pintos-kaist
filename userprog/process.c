@@ -299,7 +299,6 @@ process_exit (void) {
 
     sema_down(&curr->exit_sema);  // 부모 프로세스가 종료될 떄까지 대기
 
-	process_cleanup ();
 }
 
 /* Free the current process's resources. */
