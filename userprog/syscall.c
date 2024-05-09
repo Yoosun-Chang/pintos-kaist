@@ -133,7 +133,9 @@ exit(int status)
     thread_exit();
 }
 
-pid_t fork(const char *thread_name) {
+pid_t 
+fork(const char *thread_name) 
+{
     check_address(thread_name);
 
     return process_fork(thread_name, NULL);
@@ -156,7 +158,8 @@ remove(const char *file)
 }
 
 int 
-open(const char *file) {
+open(const char *file) 
+{
     check_address(file);
     struct file *newfile = filesys_open(file);
 
@@ -182,7 +185,8 @@ filesize(int fd) {
 }
 
 int 
-read(int fd, void *buffer, unsigned length) {
+read(int fd, void *buffer, unsigned length) 
+{
     check_address(buffer);
 
     if (fd == 0) {  // 0(stdin) -> keyboard로 직접 입력
@@ -217,7 +221,8 @@ read(int fd, void *buffer, unsigned length) {
 }
 
 int 
-write(int fd, const void *buffer, unsigned length) {
+write(int fd, const void *buffer, unsigned length) 
+{
     check_address(buffer);
 
     off_t bytes = -1;
@@ -243,7 +248,8 @@ write(int fd, const void *buffer, unsigned length) {
 }
 
 void 
-seek(int fd, unsigned position) {
+seek(int fd, unsigned position) 
+{
     struct file *file = process_get_file(fd);
 
     if (fd < 3 || file == NULL)
@@ -253,7 +259,8 @@ seek(int fd, unsigned position) {
 }
 
 int 
-tell(int fd) {
+tell(int fd) 
+{
     struct file *file = process_get_file(fd);
 
     if (fd < 3 || file == NULL)
@@ -263,7 +270,8 @@ tell(int fd) {
 }
 
 void 
-close(int fd) {
+close(int fd) 
+{
     struct file *file = process_get_file(fd);
 
     if (fd < 3 || file == NULL)
