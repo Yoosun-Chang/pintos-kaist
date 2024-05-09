@@ -119,6 +119,14 @@ struct thread {
 	uint64_t *pml4;                     /* Page map level 4 */
 	/** project2-System Call */
 	int exit_status;
+
+	int fd_idx;              // 파일 디스크립터 인덱스
+    struct file **fdt;       // 파일 디스크립터 테이블
+    struct file *runn_file;  // 실행중인 파일
+
+    struct intr_frame parent_if;  // 부모 프로세스 if
+    struct list child_list;
+    struct list_elem child_elem;
 #endif
 
 #ifdef VM
