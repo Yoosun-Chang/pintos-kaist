@@ -5,6 +5,7 @@
 #include <list.h>
 #include <stdint.h>
 #include "threads/interrupt.h"
+#include "threads/synch.h" /** project2-System Call */
 #ifdef VM
 #include "vm/vm.h"
 #endif
@@ -133,7 +134,7 @@ struct thread {
     struct list child_list;
     struct list_elem child_elem;
 
-	    struct semaphore fork_sema;  // fork가 완료될 때 signal
+	struct semaphore fork_sema;  // fork가 완료될 때 signal
     struct semaphore exit_sema;  // 자식 프로세스 종료 signal
     struct semaphore wait_sema;  // exit_sema를 기다릴 때 사용
 #endif
