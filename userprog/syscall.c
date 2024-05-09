@@ -12,6 +12,8 @@
 #include "threads/mmu.h"
 #include "filesys/file.h"
 #include "filesys/filesys.h"
+#include "threads/palloc.h"
+#include "userprog/process.h"
 #include <off_t.h>
 
 void syscall_entry (void);
