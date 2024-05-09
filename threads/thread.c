@@ -769,15 +769,14 @@ test_max_priority (void)
 
     struct thread *th = list_entry(list_front(&ready_list), struct thread, elem);
 
-    if (thread_get_priority() < th->priority)
-	
-	    /** Project 2 Panic 방지 */
-        if (intr_context)
-            return;
-
-        thread_yield();
+    if (thread_current()->priority < th->priority) {
+        /** Project 2: Panic 방지 */
+        if (intr_context())
+            intr_yield_on_return();
+        else
+            thread_yield();
+    }
 }
-
 /** project1-Priority Scheduling */
 bool 
 cmp_priority (const struct list_elem *a, const struct list_elem *b, void *aux UNUSED) 
