@@ -179,3 +179,29 @@ read(int fd, void *buffer, unsigned length) {
 
     return bytes;
 }
+
+int 
+write(int fd, const void *buffer, unsigned length) {
+    check_address(buffer);
+
+    off_t bytes = -1;
+
+    if (fd <= 0)  // stdin에 쓰려고 할 경우 & fd 음수일 경우
+        return -1;
+
+    if (fd < 3) {  // 1(stdout) * 2(stderr) -> console로 출력
+        putbuf(buffer, length);
+        return length;
+    }
+
+    struct file *file = process_get_file(fd);
+
+    if (file == NULL)
+        return -1;
+
+    lock_acquire(&filesys_lock);
+    bytes = file_write(file, buffer, length);
+    lock_release(&filesys_lock);
+
+    return bytes;
+}
