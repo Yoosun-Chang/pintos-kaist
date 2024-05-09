@@ -770,6 +770,11 @@ test_max_priority (void)
     struct thread *th = list_entry(list_front(&ready_list), struct thread, elem);
 
     if (thread_get_priority() < th->priority)
+	
+	    /** Project 2 Panic 방지 */
+        if (intr_context)
+            return;
+
         thread_yield();
 }
 
