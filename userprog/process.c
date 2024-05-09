@@ -424,9 +424,9 @@ load (const char *file_name, struct intr_frame *if_) {
         goto done;
     }
 
-    /** #Project 2: System Call - 파일 실행 명시 및 접근 금지 설정  */
+    /** project2-System Call - 파일 실행 명시 및 접근 금지 설정  */
     t->runn_file = file;
-    file_deny_write(file); /** #Project 2: Denying Writes to Executables */
+    file_deny_write(file); /** Project 2: Denying Writes to Executables */
 
     /* Read and verify executable header. */
     if (file_read(file, &ehdr, sizeof ehdr) != sizeof ehdr || memcmp(ehdr.e_ident, "\177ELF\2\1\1", 7) || ehdr.e_type != 2 || ehdr.e_machine != 0x3E  // amd64
@@ -716,7 +716,9 @@ setup_stack (struct intr_frame *if_) {
 
 /** project2-Command Line Parsing */
 // 유저 스택에 파싱된 토큰을 저장하는 함수
-void argument_stack(char **argv, int argc, struct intr_frame *if_) {
+void 
+argument_stack(char **argv, int argc, struct intr_frame *if_) 
+{
       char *arg_addr[100];
     int argv_len;
 
@@ -746,7 +748,9 @@ void argument_stack(char **argv, int argc, struct intr_frame *if_) {
 }
 
 /** project2-System Call */
-struct thread *get_child_process(int pid) {
+struct thread 
+*get_child_process(int pid) 
+{
     struct thread *curr = thread_current();
     struct thread *t;
 
@@ -761,7 +765,9 @@ struct thread *get_child_process(int pid) {
 }
 
 // 현재 스레드 fdt에 파일 추가
-int process_add_file(struct file *f) {
+int 
+process_add_file(struct file *f) 
+{
     struct thread *curr = thread_current();
     struct file **fdt = curr->fdt;
 
@@ -774,7 +780,9 @@ int process_add_file(struct file *f) {
 }
 
 // 현재 스레드의 fd번째 파일 정보 얻기
-struct file *process_get_file(int fd) {
+struct file 
+*process_get_file(int fd) 
+{
     struct thread *curr = thread_current();
 
     if (fd >= FDCOUNT_LIMIT)
@@ -784,7 +792,9 @@ struct file *process_get_file(int fd) {
 }
 
 // 현재 스레드의 fdt에서 파일 삭제
-int process_close_file(int fd) {
+int 
+process_close_file(int fd) 
+{
     struct thread *curr = thread_current();
 
     if (fd >= FDCOUNT_LIMIT)
