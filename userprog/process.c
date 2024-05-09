@@ -265,10 +265,18 @@ process_wait (tid_t child_tid UNUSED) {
 	 * XXX:       to add infinite loop here before
 	 * XXX:       implementing the process_wait. */
 
-	/** project2-Command Line Parsing */
-	while (1){}
+    struct thread *child = get_child_process(child_tid);
+    if (child == NULL)
+        return -1;
 
-	return -1;
+    sema_down(&child->wait_sema);  // 자식 프로세스가 종료될 때 까지 대기.
+
+    int exit_status = child->exit_status;
+    list_remove(&child->child_elem);
+
+    sema_up(&child->exit_sema);  // 자식 프로세스가 죽을 수 있도록 signal
+
+    return exit_status;
 }
 
 /* Exit the process. This function is called by thread_exit (). */
