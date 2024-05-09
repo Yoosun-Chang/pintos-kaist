@@ -243,7 +243,7 @@ process_exec (void *f_name) {
 	palloc_free_page (file_name);
 	
     //hex_dump(_if.rsp, _if.rsp, USER_STACK - _if.rsp, true);
-	
+
 	/* Start switched process. */
 	do_iret (&_if);
 	NOT_REACHED ();
@@ -418,6 +418,10 @@ load (const char *file_name, struct intr_frame *if_) {
 		printf ("load: %s: open failed\n", file_name);
 		goto done;
 	}
+
+	/** project2-System Call */
+	t->runn_file = file;
+    file_deny_write(file);
 
 	/* Read and verify executable header. */
 	if (file_read (file, &ehdr, sizeof ehdr) != sizeof ehdr
