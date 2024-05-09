@@ -718,6 +718,7 @@ int process_add_file(struct file *f) {
     return curr->fd_idx - 1;
 }
 
+// 현재 스레드의 fd번째 파일 정보 얻기
 struct file *process_get_file(int fd) {
     struct thread *curr = thread_current();
 
@@ -725,4 +726,15 @@ struct file *process_get_file(int fd) {
         return NULL;
 
     return curr->fdt[fd];
+}
+
+// 현재 스레드의 fdt에서 파일 삭제
+int process_close_file(int fd) {
+    struct thread *curr = thread_current();
+
+    if (fd >= FDCOUNT_LIMIT)
+        return -1;
+
+    curr->fdt[fd] = NULL;
+    return 0;
 }
