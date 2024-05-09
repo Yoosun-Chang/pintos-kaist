@@ -509,7 +509,12 @@ init_thread (struct thread *t, const char *name, int priority) {
     t->recent_cpu = RECENT_CPU_DEFAULT;
 
 	/** project2-System Call */
-	t->exit_status = 0;
+    t->runn_file = NULL;
+
+    list_init(&t->child_list);
+    sema_init(&t->fork_sema, 0);
+    sema_init(&t->exit_sema, 0);
+    sema_init(&t->wait_sema, 0);
 }
 
 /* Chooses and returns the next thread to be scheduled.  Should
