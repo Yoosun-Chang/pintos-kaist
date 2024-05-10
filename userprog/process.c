@@ -773,6 +773,9 @@ process_add_file(struct file *f)
 
     if (curr->fd_idx >= FDCOUNT_LIMIT)
         return -1;
+		
+    while (fdt[curr->fd_idx] != NULL)
+        curr->fd_idx++;		
 
     fdt[curr->fd_idx++] = f;
 
@@ -785,7 +788,7 @@ struct file
 {
     struct thread *curr = thread_current();
 
-    if (fd >= FDCOUNT_LIMIT)
+    if (fd < 0 || fd >= FDCOUNT_LIMIT)
         return NULL;
 
     return curr->fdt[fd];
@@ -797,7 +800,7 @@ process_close_file(int fd)
 {
     struct thread *curr = thread_current();
 
-    if (fd >= FDCOUNT_LIMIT)
+    if (fd < 0 || fd >= FDCOUNT_LIMIT)
         return -1;
 
     curr->fdt[fd] = NULL;
