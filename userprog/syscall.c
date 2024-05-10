@@ -303,17 +303,37 @@ tell(int fd)
     return file_tell(file);
 }
 
+/** Project 2-Extend File Descriptor */
 void 
 close(int fd) 
 {
+    struct thread *curr = thread_current();
     struct file *file = process_get_file(fd);
 
-    if (fd < 3 || file == NULL)
+    if (file == NULL)
         return;
 
     process_close_file(fd);
 
-    file_close(file);
+    if (file == STDIN) {
+        file = 0;
+        return;
+    }
+
+    if (file == STDOUT) {
+        file = 0;
+        return;
+    }
+
+    if (file == STDERR) {
+        file = 0;
+        return;
+    }
+
+    if (file->dup_count == 0)
+        file_close(file);
+    else
+        file->dup_count--;
 }
 
 /** Project 2-Extend File Descriptor */
