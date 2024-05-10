@@ -220,13 +220,13 @@ thread_create (const char *name, int priority,
     if (t->fdt == NULL)
         return TID_ERROR;
 
-    t->exit_status = 0;  // exit_status 초기화
+    t->exit_status = 0; 
 
     t->fd_idx = 3;
-    t->fdt[0] = 0;  // stdin 예약된 자리 (dummy)
-    t->fdt[1] = 1;  // stdout 예약된 자리 (dummy)
-    t->fdt[2] = 2;  // stderr 예약된 자리 (dummy)
-
+    t->fdt[0] = STDIN;   
+    t->fdt[1] = STDOUT; 
+    t->fdt[2] = STDERR;  
+	
     list_push_back(&thread_current()->child_list, &t->child_elem);
 #endif
 
