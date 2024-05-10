@@ -22,6 +22,7 @@
 #include "vm/vm.h"
 #endif
 
+
 static void process_cleanup (void);
 static bool load (const char *file_name, struct intr_frame *if_);
 static void initd (void *f_name);
@@ -185,10 +186,7 @@ __do_fork (void *aux) {
         goto error;
 
 	/** Project 2-Extend File Descriptor */
-    struct dict_elem dup_file_dict[DICTLEN];
-    int dup_idx = 0;
 
-    current->fd_idx = parent->fd_idx;
     struct file *file;
 
     for (int fd = 0; fd < FDCOUNT_LIMIT; fd++) {
@@ -196,31 +194,14 @@ __do_fork (void *aux) {
         if (file == NULL)
             continue;
 
-        bool is_exist = false;
-
-        for (int i = 0; i <= dup_idx; i++) {
-            if (dup_file_dict[i].key == file) {
-                current->fdt[fd] = file_duplicate(file);
-                is_exist = true;
-                break;
-            }
-        }
-
-        if (is_exist)
-            continue;
-
         if (file > STDERR)
             current->fdt[fd] = file_duplicate(file);
         else
             current->fdt[fd] = file;
-
-        if (dup_idx < DICTLEN) {
-            dup_file_dict[dup_idx].key = file;
-            dup_file_dict[dup_idx++].value = current->fdt[fd];
-        }
 	}
 
-    sema_up(&current->fork_sema);  // fork 프로세스가 정상적으로 완료됐으므로 현재 fork용 sema unblock
+    current->fd_idx = parent->fd_idx;
+    sema_up(&current->fork_sema);  
 
     process_init();
 
@@ -229,6 +210,7 @@ __do_fork (void *aux) {
         do_iret(&if_);  // 정상 종료 시 자식 Process를 수행하러 감
 
 error:
+	
     sema_up(&current->fork_sema);  // 복제에 실패했으므로 현재 fork용 sema unblock
     exit(TID_ERROR);
 }
