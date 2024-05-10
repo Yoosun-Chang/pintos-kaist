@@ -220,7 +220,7 @@ read(int fd, void *buffer, unsigned length)
 
     struct file *file = process_get_file(fd);
 
-    if (file == STDIN) {  
+    if (file == STDIN) { 
         int i = 0; 
         char c;
         unsigned char *buf = buffer;
@@ -231,7 +231,6 @@ read(int fd, void *buffer, unsigned length)
             if (c == '\0')
                 break;
         }
-
         return i;
     }
 
@@ -286,7 +285,7 @@ seek(int fd, unsigned position)
         
     struct file *file = process_get_file(fd);
 
-    if (fd < 3 || file == NULL)
+    if (file == NULL || (file >= STDIN && file <= STDERR))
         return;
 
     file_seek(file, position);
@@ -297,7 +296,7 @@ tell(int fd)
 {
     struct file *file = process_get_file(fd);
 
-    if (fd < 3 || file == NULL)
+    if (file == NULL || (file >= STDIN && file <= STDERR))
         return -1;
 
     return file_tell(file);
