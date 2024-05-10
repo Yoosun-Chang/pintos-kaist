@@ -803,3 +803,19 @@ process_close_file(int fd)
     curr->fdt[fd] = NULL;
     return 0;
 }
+
+/** Project 2-Extend File Descriptor */
+process_insert_file(int fd, struct file *f) {
+    struct thread *curr = thread_current();
+    struct file **fdt = curr->fdt;
+
+    if (fd < 0 || fd >= FDCOUNT_LIMIT)
+        return -1;
+
+    if (f > STDERR)
+        f->dup_count++;
+
+    fdt[fd] = f;
+
+    return fd;
+}
