@@ -22,4 +22,8 @@ int process_close_file(int fd);
 /** Project 2-Extend File Descriptor */
 process_insert_file(int fd, struct file *f);
 
+#define STDIN 1
+#define STDOUT 2
+#define STDERR 3
+
 #endif /* userprog/process.h */
