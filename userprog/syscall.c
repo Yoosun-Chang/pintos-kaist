@@ -104,6 +104,9 @@ int sys_number = f->R.rax;
         case SYS_CLOSE:
             close(f->R.rdi);
             break;
+        case SYS_DUP2:
+            f->R.rax = dup2(f->R.rdi, f->R.rsi);
+            break;
         default:
             exit(-1);
     }
