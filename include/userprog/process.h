@@ -26,11 +26,4 @@ process_insert_file(int fd, struct file *f);
 #define STDOUT 2
 #define STDERR 3
 
-#define DICTLEN 100
-
-struct dict_elem{
-	uintptr_t key;
-	uintptr_t value;
-};
-
 #endif /* userprog/process.h */
