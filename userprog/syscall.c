@@ -211,13 +211,17 @@ filesize(int fd) {
     return file_length(file);
 }
 
+/** Project 2-Extend File Descriptor */
 int 
 read(int fd, void *buffer, unsigned length) 
 {
+    struct thread *curr = thread_current();
     check_address(buffer);
 
-    if (fd == 0) {  // 0(stdin) -> keyboard로 직접 입력
-        int i = 0;  // 쓰레기 값 return 방지
+    struct file *file = process_get_file(fd);
+
+    if (file == STDIN) {  
+        int i = 0; 
         char c;
         unsigned char *buf = buffer;
 
@@ -230,15 +234,11 @@ read(int fd, void *buffer, unsigned length)
 
         return i;
     }
-    // 그 외의 경우
-    if (fd < 3)  // stdout, stderr를 읽으려고 할 경우 & fd가 음수일 경우
+
+    if (file == NULL || file == STDOUT || file == STDERR)  // 빈 파일, stdout, stderr를 읽으려고 할 경우
         return -1;
 
-    struct file *file = process_get_file(fd);
     off_t bytes = -1;
-
-    if (file == NULL)  // 파일이 비어있을 경우
-        return -1;
 
     lock_acquire(&filesys_lock);
     bytes = file_read(file, buffer, length);
@@ -247,25 +247,31 @@ read(int fd, void *buffer, unsigned length)
     return bytes;
 }
 
+/** Project 2-Extend File Descriptor */
 int 
 write(int fd, const void *buffer, unsigned length) 
 {
     check_address(buffer);
 
+    struct thread *curr = thread_current();
     off_t bytes = -1;
 
-    if (fd <= 0)  // stdin에 쓰려고 할 경우 & fd 음수일 경우
+    struct file *file = process_get_file(fd);
+
+    if (file == STDIN || file == NULL)  
         return -1;
 
-    if (fd < 3) {  // 1(stdout) * 2(stderr) -> console로 출력
+    if (file == STDOUT) { 
+
         putbuf(buffer, length);
         return length;
     }
 
-    struct file *file = process_get_file(fd);
+    if (file == STDERR) { 
 
-    if (file == NULL)
-        return -1;
+        putbuf(buffer, length);
+        return length;
+    }
 
     lock_acquire(&filesys_lock);
     bytes = file_write(file, buffer, length);
@@ -277,6 +283,7 @@ write(int fd, const void *buffer, unsigned length)
 void 
 seek(int fd, unsigned position) 
 {
+        
     struct file *file = process_get_file(fd);
 
     if (fd < 3 || file == NULL)
