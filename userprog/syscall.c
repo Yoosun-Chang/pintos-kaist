@@ -308,3 +308,28 @@ close(int fd)
 
     file_close(file);
 }
+
+/** Project 2-Extend File Descriptor */
+int dup2(int oldfd, int newfd) {
+    if (oldfd < 0 || newfd < 0)
+        return -1;
+
+    struct file *oldfile = process_get_file(oldfd);
+
+    if (oldfile == NULL)
+        return -1;
+
+    if (oldfd == newfd)
+        return newfd;
+
+    struct file *newfile = process_get_file(newfd);
+
+    if (oldfile == newfile)
+        return newfd;
+
+    close(newfd);
+
+    newfd = process_insert_file(newfd, oldfile);
+
+    return newfd;
+}

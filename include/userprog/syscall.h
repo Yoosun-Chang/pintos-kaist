@@ -28,4 +28,7 @@ void seek(int fd, unsigned position);
 int tell(int fd);
 void close(int fd);
 
+/** Project 2-Extend File Descriptor */
+int dup2(int oldfd, int newfd)
+
 #endif /* userprog/syscall.h */
