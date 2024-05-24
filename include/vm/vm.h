@@ -2,6 +2,7 @@
 #define VM_VM_H
 #include <stdbool.h>
 #include "threads/palloc.h"
+#include <hash.h> /** Project 3-Memory Management */
 
 enum vm_type {
 	/* page not initialized */
@@ -57,12 +58,17 @@ struct page {
 		struct page_cache page_cache;
 #endif
 	};
+	/** Project 3-Memory Management */
+	struct hash_elem hash_elem;
+	bool writable;
 };
 
 /* The representation of "frame" */
 struct frame {
 	void *kva;
 	struct page *page;
+	/** Project 3-Memory Management */
+	struct list_elem frame_elem; 
 };
 
 /* The function table for page operations.
@@ -85,6 +91,7 @@ struct page_operations {
  * We don't want to force you to obey any specific design for this struct.
  * All designs up to you for this. */
 struct supplemental_page_table {
+	 struct hash spt_hash; /** Project 3-Memory Management */
 };
 
 #include "threads/thread.h"
@@ -109,4 +116,7 @@ void vm_dealloc_page (struct page *page);
 bool vm_claim_page (void *va);
 enum vm_type page_get_type (struct page *page);
 
+/** Project 3-Memory Management */
+uint64_t page_hash(const struct hash_elem *e, void *aux);
+bool page_less(const struct hash_elem *a, const struct hash_elem *b, void *aux);
 #endif  /* VM_VM_H */
