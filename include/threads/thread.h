@@ -140,6 +140,10 @@ struct thread {
 #ifdef VM
 	/* Table for whole virtual memory owned by thread. */
 	struct supplemental_page_table spt;
+
+	/** Project 3-Anonymous Page - stack용 포인터 생성*/
+    void *stack_bottom;
+    void *stack_pointer;
 #endif
 
 	/* Owned by thread.c. */

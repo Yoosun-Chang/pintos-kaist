@@ -737,11 +737,15 @@ setup_stack (struct intr_frame *if_) {
 	bool success = false;
 	void *stack_bottom = (void *) (((uint8_t *) USER_STACK) - PGSIZE);
 
-	/* TODO: Map the stack on stack_bottom and claim the page immediately.
-	 * TODO: If success, set the rsp accordingly.
-	 * TODO: You should mark the page is stack. */
-	/* TODO: Your code goes here */
+	/** Project 3-Memory Management */	
+    if (vm_alloc_page(VM_ANON | VM_MARKER_0, stack_bottom, 1)) {  // MARKER_0로 STACK에 있는 것을 표시
+        success = vm_claim_page(stack_bottom);
 
+        if (success) {
+            if_->rsp = USER_STACK;
+            thread_current()->stack_bottom = stack_bottom;
+        }
+    }
 	return success;
 }
 #endif /* VM */
