@@ -198,3 +198,13 @@ page_hash(const struct hash_elem *e, void *aux)
 	struct page *page = hash_entry(e, struct page, hash_elem);
 	return hash_bytes(page->va, sizeof *page->va);
 }
+
+/** Project 3-Memory Management */
+bool 
+page_less(const struct hash_elem *a, const struct hash_elem *b, void *aux)
+{
+	struct page *page_a = hash_entry(a, struct page, hash_elem);
+	struct page *page_b = hash_entry(b, struct page, hash_elem);
+
+	return page_a->va < page_b->va;
+}

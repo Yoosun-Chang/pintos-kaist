@@ -115,5 +115,5 @@ enum vm_type page_get_type (struct page *page);
 
 /** Project 3-Memory Management */
 uint64_t page_hash(const struct hash_elem *e, void *aux);
-
+bool page_less(const struct hash_elem *a, const struct hash_elem *b, void *aux);
 #endif  /* VM_VM_H */
