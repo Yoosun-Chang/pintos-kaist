@@ -9,7 +9,7 @@ void syscall_init (void);
 typedef int pid_t;
 
 #include <stdbool.h>
-void check_address(void *addr);
+// void check_address(void *addr);
 void halt(void);
 void exit(int status);
 
@@ -30,5 +30,11 @@ void close(int fd);
 
 /** Project 2-Extend File Descriptor */
 int dup2(int oldfd, int newfd);
-
+/** Project 3-Anonymous Page */
+#ifndef VM
+void check_address(void *addr);
+#else
+/** #Project 3: Anonymous Page */
+struct page *check_address(void *addr);
+#endif
 #endif /* userprog/syscall.h */
