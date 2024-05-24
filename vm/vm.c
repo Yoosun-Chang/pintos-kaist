@@ -5,6 +5,7 @@
 #include "vm/inspect.h"
 
 /** Project 3-Memory Management */
+#include "threads/mmu.h"
 static struct list frame_table; 
 
 /* Initializes the virtual memory subsystem by invoking each subsystem's
@@ -68,13 +69,12 @@ err:
 /* Find VA from spt and return page. On error, return NULL. */
 struct page *
 spt_find_page (struct supplemental_page_table *spt UNUSED, void *va UNUSED) {
-	struct page *page = NULL;
 
 	/** Project 3-Memory Management */
-	struct page *page = (struct page *)malloc(sizeof(struct page));     // 가상 주소에 대응하는 해시 값 도출을 위해 새로운 페이지 할당
-    page->va = pg_round_down(va);                                       // 가상 주소의 시작 주소를 페이지의 va에 복제
-    struct hash_elem *e = hash_find(&spt->spt_hash, &page->hash_elem);  // spt hash 테이블에서 hash_elem과 같은 hash를 갖는 페이지를 찾아서 return
-    free(page);                                                         // 복제한 페이지 삭제
+	struct page *page = (struct page *)malloc(sizeof(struct page));     
+    page->va = pg_round_down(va);                                       
+    struct hash_elem *e = hash_find(&spt->spt_hash, &page->hash_elem);  
+    free(page);                                                         
 
     return e != NULL ? hash_entry(e, struct page, hash_elem) : NULL;
 }
@@ -183,7 +183,8 @@ vm_do_claim_page (struct page *page) {
 	frame->page = page;
 	page->frame = frame;
 
-	/* TODO: Insert page table entry to map page's VA to frame's PA. */
+    if (!pml4_set_page(thread_current()->pml4, page->va, frame->kva, page->writable))
+        return false;
 
 	return swap_in (page, frame->kva);
 }
