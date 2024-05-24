@@ -234,6 +234,34 @@ supplemental_page_table_init (struct supplemental_page_table *spt UNUSED) {
 bool
 supplemental_page_table_copy (struct supplemental_page_table *dst UNUSED,
 		struct supplemental_page_table *src UNUSED) {
+	
+	/** #project3-Anonymous Page */
+	struct hash_iterator i;
+	hash_first(&i, &src->spt_hash);
+	while (hash_next(&i))
+	{
+		struct page *src_page = hash_entry(hash_cur(&i), struct page, hash_elem);
+		enum vm_type src_type = src_page->operations->type;
+
+		if (src_type == VM_UNINIT)
+		{
+			vm_alloc_page_with_initializer(
+				src_page->uninit.type,
+				src_page->va,
+				src_page->writable,
+				src_page->uninit.init,
+				src_page->uninit.aux);
+		}
+		else
+		{
+			if (vm_alloc_page(src_type, src_page->va, src_page->writable) && vm_claim_page(src_page->va))
+			{
+				struct page *dst_page = spt_find_page(dst, src_page->va);
+				memcpy(dst_page->frame->kva, src_page->frame->kva, PGSIZE);
+			}
+		}
+	}
+	return true;
 }
 
 /* Free the resource hold by the supplemental page table */
