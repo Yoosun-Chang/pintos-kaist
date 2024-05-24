@@ -125,7 +125,7 @@ void check_address(void *addr) {
 struct page *check_address(void *addr) {
     struct thread *curr = thread_current();
 
-    if (is_kernel_vaddr(addr) || addr == NULL)
+    if (is_kernel_vaddr(addr) || addr == NULL || !spt_find_page(&curr->spt, addr))
         exit(-1);
 
     return spt_find_page(&curr->spt, addr);
