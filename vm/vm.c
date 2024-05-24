@@ -64,9 +64,14 @@ err:
 struct page *
 spt_find_page (struct supplemental_page_table *spt UNUSED, void *va UNUSED) {
 	struct page *page = NULL;
-	/* TODO: Fill this function. */
 
-	return page;
+	/** Project 3-Memory Management */
+	struct page *page = (struct page *)malloc(sizeof(struct page));     // 가상 주소에 대응하는 해시 값 도출을 위해 새로운 페이지 할당
+    page->va = pg_round_down(va);                                       // 가상 주소의 시작 주소를 페이지의 va에 복제
+    struct hash_elem *e = hash_find(&spt->spt_hash, &page->hash_elem);  // spt hash 테이블에서 hash_elem과 같은 hash를 갖는 페이지를 찾아서 return
+    free(page);                                                         // 복제한 페이지 삭제
+
+    return e != NULL ? hash_entry(e, struct page, hash_elem) : NULL;
 }
 
 /* Insert PAGE into spt with validation. */
