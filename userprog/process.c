@@ -664,9 +664,22 @@ install_page (void *upage, void *kpage, bool writable) {
 
 static bool
 lazy_load_segment (struct page *page, void *aux) {
-	/* TODO: Load the segment from the file */
-	/* TODO: This called when the first page fault occurs on address VA. */
-	/* TODO: VA is available when calling this function. */
+	/** Project 3-Memory Management */
+    struct vm_load_arg *aux_p = aux;
+    struct file *file = aux_p->file;
+    off_t offset = aux_p->ofs;
+    size_t page_read_bytes = aux_p->read_bytes;
+    size_t page_zero_bytes = PGSIZE - page_read_bytes;
+
+    file_seek(file, offset);                                                             
+    if (file_read(file, page->frame->kva, page_read_bytes) != (off_t)page_read_bytes) {  
+        palloc_free_page(page->frame->kva);                                            
+        return false;
+    }
+
+    memset(page->frame->kva + page_read_bytes, 0, page_zero_bytes);  
+
+    return true;
 }
 
 /* Loads a segment starting at offset OFS in FILE at address
@@ -698,13 +711,13 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 		size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
 		/** #project3-Anonymous Page */
-		struct vm_load_arg *con = (struct vm_load_arg *)malloc(sizeof(struct vm_load_arg));
-		con->file = file;
-		con->ofs = ofs;
-		con->read_bytes = page_read_bytes;
+		struct vm_load_arg *aux = (struct vm_load_arg *)malloc(sizeof(struct vm_load_arg));
+		aux->file = file;
+		aux->ofs = ofs;
+		aux->read_bytes = page_read_bytes;
 
 		if (!vm_alloc_page_with_initializer (VM_ANON, upage,
-					writable, lazy_load_segment, con))
+					writable, lazy_load_segment, aux))
 			return false;
 
 		/* Advance. */
