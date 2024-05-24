@@ -4,6 +4,9 @@
 #include "vm/vm.h"
 #include "vm/inspect.h"
 
+/** Project 3-Memory Management */
+static struct list frame_table; 
+
 /* Initializes the virtual memory subsystem by invoking each subsystem's
  * intialize codes. */
 void
@@ -15,7 +18,9 @@ vm_init (void) {
 #endif
 	register_inspect_intr ();
 	/* DO NOT MODIFY UPPER LINES. */
-	/* TODO: Your code goes here. */
+	
+	/** Project 3-Memory Management */
+	list_init(&frame_table);
 }
 
 /* Get the type of the page. This function is useful if you want to know the

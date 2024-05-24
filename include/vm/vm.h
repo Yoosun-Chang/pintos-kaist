@@ -66,6 +66,8 @@ struct page {
 struct frame {
 	void *kva;
 	struct page *page;
+	/** Project 3-Memory Management */
+	struct list_elem frame_elem; 
 };
 
 /* The function table for page operations.
