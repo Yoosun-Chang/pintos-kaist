@@ -170,7 +170,7 @@ vm_try_handle_fault (struct intr_frame *f UNUSED, void *addr UNUSED,
 		bool user UNUSED, bool write UNUSED, bool not_present UNUSED) {
 	struct supplemental_page_table *spt UNUSED = &thread_current ()->spt;
 
-	/** Project 3-Memory Management */
+	/** Project 3-Anonymous Page */
 	struct page *page = spt_find_page(&thread_current()->spt, addr);
    
     if (addr == NULL || is_kernel_vaddr(addr))
@@ -235,7 +235,7 @@ bool
 supplemental_page_table_copy (struct supplemental_page_table *dst UNUSED,
 		struct supplemental_page_table *src UNUSED) {
 	
-	/** #project3-Anonymous Page */
+	/** Project 3-Anonymous Page */
 	struct hash_iterator i;
 	hash_first(&i, &src->spt_hash);
 	while (hash_next(&i))
@@ -267,7 +267,7 @@ supplemental_page_table_copy (struct supplemental_page_table *dst UNUSED,
 /* Free the resource hold by the supplemental page table */
 void
 supplemental_page_table_kill (struct supplemental_page_table *spt UNUSED) {
-	/** Project 3-Memory Management */
+	/** Project 3-Anonymous Page */
 	hash_clear(&spt->spt_hash, hash_page_destroy);
 }
 
@@ -289,7 +289,7 @@ page_less(const struct hash_elem *a, const struct hash_elem *b, void *aux)
 	return page_a->va < page_b->va;
 }
 
-/** Project 3-Memory Management */
+/** Project 3-Anonymous Page */
 void 
 hash_page_destroy(struct hash_elem *e, void *aux)
 {

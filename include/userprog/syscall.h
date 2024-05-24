@@ -34,7 +34,6 @@ int dup2(int oldfd, int newfd);
 #ifndef VM
 void check_address(void *addr);
 #else
-/** #Project 3: Anonymous Page */
 struct page *check_address(void *addr);
 #endif
 #endif /* userprog/syscall.h */

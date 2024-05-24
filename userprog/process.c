@@ -664,7 +664,7 @@ install_page (void *upage, void *kpage, bool writable) {
 
 static bool
 lazy_load_segment (struct page *page, void *aux) {
-	/** Project 3-Memory Management */
+	/** Project 3-Anonymous Page */
     struct vm_load_arg *aux_p = aux;
     struct file *file = aux_p->file;
     off_t offset = aux_p->ofs;
@@ -710,7 +710,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 		size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE;
 		size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
-		/** #project3-Anonymous Page */
+		/** Project 3-Anonymous Page */
 		struct vm_load_arg *aux = (struct vm_load_arg *)malloc(sizeof(struct vm_load_arg));
 		aux->file = file;
 		aux->ofs = ofs;
@@ -725,7 +725,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 		zero_bytes -= page_zero_bytes;
 		upage += PGSIZE;
 
-		/** #project3-Anonymous Page */
+		/** Project 3-Anonymous Page */
 		ofs += page_read_bytes;
 	}
 	return true;
@@ -737,7 +737,7 @@ setup_stack (struct intr_frame *if_) {
 	bool success = false;
 	void *stack_bottom = (void *) (((uint8_t *) USER_STACK) - PGSIZE);
 
-	/** Project 3-Memory Management */	
+	/** Project 3-Anonymous Page */
     if (vm_alloc_page(VM_ANON | VM_MARKER_0, stack_bottom, 1)) {  // MARKER_0로 STACK에 있는 것을 표시
         success = vm_claim_page(stack_bottom);
 
