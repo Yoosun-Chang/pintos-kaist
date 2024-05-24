@@ -18,7 +18,7 @@ vm_init (void) {
 #endif
 	register_inspect_intr ();
 	/* DO NOT MODIFY UPPER LINES. */
-	
+
 	/** Project 3-Memory Management */
 	list_init(&frame_table);
 }
@@ -118,10 +118,19 @@ vm_evict_frame (void) {
  * space.*/
 static struct frame *
 vm_get_frame (void) {
-	struct frame *frame = NULL;
-	/* TODO: Fill this function. */
-
+	/** Project 3-Memory Management */
+	struct frame *frame = (struct frame *)malloc(sizeof(struct frame));
 	ASSERT (frame != NULL);
+
+	frame->kva = palloc_get_page(PAL_USER | PAL_ZERO);  
+
+    if (frame->kva == NULL)
+        frame = vm_evict_frame();  
+    else
+        list_push_back(&frame_table, &frame->frame_elem);
+		
+    frame->page = NULL;
+
 	ASSERT (frame->page == NULL);
 	return frame;
 }
