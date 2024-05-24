@@ -508,6 +508,7 @@ init_thread (struct thread *t, const char *name, int priority) {
     t->niceness = NICE_DEFAULT;
     t->recent_cpu = RECENT_CPU_DEFAULT;
 
+#ifdef USERPROG
 	/** project2-System Call */
     t->runn_file = NULL;
 
@@ -515,6 +516,7 @@ init_thread (struct thread *t, const char *name, int priority) {
     sema_init(&t->fork_sema, 0);
     sema_init(&t->exit_sema, 0);
     sema_init(&t->wait_sema, 0);
+#endif
 }
 
 /* Chooses and returns the next thread to be scheduled.  Should

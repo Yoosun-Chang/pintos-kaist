@@ -10,8 +10,6 @@
 #include "vm/vm.h"
 #endif
 
-#define USERPROG
-
 /* States in a thread's life cycle. */
 enum thread_status {
 	THREAD_RUNNING,     /* Running thread. */
