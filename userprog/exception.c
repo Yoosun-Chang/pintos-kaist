@@ -139,9 +139,12 @@ page_fault (struct intr_frame *f) {
 	not_present = (f->error_code & PF_P) == 0;
 	write = (f->error_code & PF_W) != 0;
 	user = (f->error_code & PF_U) != 0;
-
-	/** project2-System Call */
-	exit(-1);
+	
+	/** Project 3-Anonymous Page */
+	if ((!not_present && write) || (fault_addr < 0x400000 || fault_addr >= USER_STACK))
+	{
+		exit(-1);
+	}
 
 #ifdef VM
 	/* For project 3 and later. */
