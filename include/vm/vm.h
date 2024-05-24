@@ -82,6 +82,15 @@ struct page_operations {
 	enum vm_type type;
 };
 
+/** Project 3-Memory Mapped Files */
+struct vm_load_arg
+{
+	struct file *file;
+	off_t ofs;
+	uint32_t read_bytes;
+	uint32_t zero_bytes;
+};
+
 #define swap_in(page, v) (page)->operations->swap_in ((page), v)
 #define swap_out(page) (page)->operations->swap_out (page)
 #define destroy(page) \
