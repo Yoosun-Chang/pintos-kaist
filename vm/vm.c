@@ -253,33 +253,48 @@ bool
 supplemental_page_table_copy (struct supplemental_page_table *dst UNUSED,
 		struct supplemental_page_table *src UNUSED) {
 	
-	/** Project 3-Anonymous Page */
-	struct hash_iterator i;
-	hash_first(&i, &src->spt_hash);
-	while (hash_next(&i))
-	{
-		struct page *src_page = hash_entry(hash_cur(&i), struct page, hash_elem);
-		enum vm_type src_type = src_page->operations->type;
+	/** Project 3-Memory Mapped Files */
+ 	struct hash_iterator iter;
+    hash_first(&iter, &src->spt_hash);
+    while (hash_next(&iter)) {
+        struct page *src_page = hash_entry(hash_cur(&iter), struct page, hash_elem);
+        enum vm_type type = src_page->operations->type;
+        void *upage = src_page->va;
+        bool writable = src_page->writable;
 
-		if (src_type == VM_UNINIT)
-		{
-			vm_alloc_page_with_initializer(
-				src_page->uninit.type,
-				src_page->va,
-				src_page->writable,
-				src_page->uninit.init,
-				src_page->uninit.aux);
-		}
-		else
-		{
-			if (vm_alloc_page(src_type, src_page->va, src_page->writable) && vm_claim_page(src_page->va))
-			{
-				struct page *dst_page = spt_find_page(dst, src_page->va);
-				memcpy(dst_page->frame->kva, src_page->frame->kva, PGSIZE);
-			}
-		}
-	}
-	return true;
+        if (type == VM_UNINIT) {
+            void *aux = src_page->uninit.aux;
+            vm_alloc_page_with_initializer(page_get_type(src_page), upage, writable, src_page->uninit.init, aux);
+        }
+
+        else if (type == VM_FILE) {
+            struct vm_load_arg *aux = malloc(sizeof(struct vm_load_arg));
+            aux->file = src_page->file.file;
+            aux->ofs = src_page->file.offset;
+            aux->read_bytes = src_page->file.page_read_bytes;
+
+            if (!vm_alloc_page_with_initializer(type, upage, writable, NULL, aux))
+                return false;
+
+            struct page *dst_page = spt_find_page(dst, upage);
+            file_backed_initializer(dst_page, type, NULL);
+            dst_page->frame = src_page->frame;
+            pml4_set_page(thread_current()->pml4, dst_page->va, src_page->frame->kva, src_page->writable);
+        }
+
+        else {                                          
+            if (!vm_alloc_page(type, upage, writable)) 
+                return false;
+
+            if (!vm_claim_page(upage))  
+                return false;
+
+            struct page *dst_page = spt_find_page(dst, upage); 
+            memcpy(dst_page->frame->kva, src_page->frame->kva, PGSIZE);
+        }
+    }
+
+    return true;
 }
 
 /* Free the resource hold by the supplemental page table */
