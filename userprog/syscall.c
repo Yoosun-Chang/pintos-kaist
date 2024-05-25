@@ -408,4 +408,9 @@ void *mmap(void *addr, size_t length, int writable, int fd, off_t offset) {
     return do_mmap(addr, length, writable, file, offset);
 }
 
+/** Project 3-Memory Mapped Files */
+void munmap(void *addr) {
+    do_munmap(addr);
+}
+
 #endif
