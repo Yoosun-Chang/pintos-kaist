@@ -108,6 +108,8 @@ spt_insert_page (struct supplemental_page_table *spt UNUSED,
 
 void
 spt_remove_page (struct supplemental_page_table *spt, struct page *page) {
+	/** Project 3-Memory Mapped Files */
+	hash_delete(&thread_current()->spt.spt_hash, &page->hash_elem);
 	vm_dealloc_page (page);
 	return true;
 }
