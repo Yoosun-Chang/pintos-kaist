@@ -114,6 +114,9 @@ int sys_number = f->R.rax;
         case SYS_MMAP:
             f->R.rax = mmap(f->R.rdi, f->R.rsi, f->R.rdx, f->R.r10, f->R.r8);
             break;
+        case SYS_MUNMAP:
+            munmap(f->R.rdi);
+            break;
 #endif
         default:
             exit(-1);
