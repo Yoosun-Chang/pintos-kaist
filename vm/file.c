@@ -3,8 +3,10 @@
 #include "vm/vm.h"
 
 /** Project 3-Memory Mapped FIles */
+#include "threads/mmu.h"
 #include "threads/vaddr.h"
-#include "userprog/syscall.c"
+#include "userprog/process.h"
+#include "userprog/syscall.h"
 
 static bool file_backed_swap_in (struct page *page, void *kva);
 static bool file_backed_swap_out (struct page *page);
