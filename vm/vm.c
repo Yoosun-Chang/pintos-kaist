@@ -159,6 +159,7 @@ static void
 vm_stack_growth (void *addr UNUSED) {
 	/** Project 3-Stack Growth*/
     bool success = false;
+	addr = pg_round_down(addr);
     if (vm_alloc_page(VM_ANON | VM_MARKER_0, addr, true)) {
         success = vm_claim_page(addr);
 
@@ -180,25 +181,25 @@ vm_try_handle_fault (struct intr_frame *f UNUSED, void *addr UNUSED,
 	struct supplemental_page_table *spt UNUSED = &thread_current ()->spt;
 
 	/** Project 3-Anonymous Page */
-	struct page *page = spt_find_page(&thread_current()->spt, addr);
-   
+	struct page *page = NULL;
+
     if (addr == NULL || is_kernel_vaddr(addr))
         return false;
 
     if (not_present)
     {
 		/** Project 3-Stack Growth*/
-		void *stack_pointer = is_kernel_vaddr(f->rsp) ? thread_current()->stack_pointer : f->rsp;
-    	if (stack_pointer - 8 <= addr && addr >= STACK_LIMIT && addr <= USER_STACK) {
-        	vm_stack_growth(thread_current()->stack_bottom - PGSIZE);
-        	return true;
-    }
-        page = spt_find_page(spt, addr);
-        if (page == NULL)
-            return false;
-        if (write == 1 && page->writable == 0)
-            return false;
-        return vm_do_claim_page(page);
+		void *rsp = user ?  f->rsp : thread_current()->stack_pointer;
+		if (STACK_LIMIT <= rsp - 8 && rsp - 8 == addr && addr <= USER_STACK)
+			vm_stack_growth(addr);
+		else if (STACK_LIMIT <= rsp && rsp <= addr && addr <= USER_STACK)
+			vm_stack_growth(addr);
+
+		page = spt_find_page(spt, addr);
+
+		if (!page || (write && !page->writable))
+			return false;
+		return vm_do_claim_page(page);
     }
     return false;
 }
