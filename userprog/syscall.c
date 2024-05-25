@@ -57,7 +57,9 @@ syscall_handler (struct intr_frame *f UNUSED) {
 	// TODO: Your implementation goes here.
 	/** project2-System Call */
 int sys_number = f->R.rax;
-
+#ifdef VM
+    thread_current()->stack_pointer = f->rsp;
+#endif
     // Argument 순서
     // %rdi %rsi %rdx %r10 %r8 %r9
 
