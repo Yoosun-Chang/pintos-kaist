@@ -178,6 +178,12 @@ vm_try_handle_fault (struct intr_frame *f UNUSED, void *addr UNUSED,
 
     if (not_present)
     {
+		/** Project 3-Stack Growth*/
+		void *stack_pointer = is_kernel_vaddr(f->rsp) ? thread_current()->stack_pointer : f->rsp;
+    	if (stack_pointer - 8 <= addr && addr >= STACK_LIMIT && addr <= USER_STACK) {
+        	vm_stack_growth(thread_current()->stack_bottom - PGSIZE);
+        	return true;
+    }
         page = spt_find_page(spt, addr);
         if (page == NULL)
             return false;
