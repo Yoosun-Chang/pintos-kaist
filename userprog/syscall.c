@@ -109,6 +109,12 @@ int sys_number = f->R.rax;
         case SYS_DUP2:
             f->R.rax = dup2(f->R.rdi, f->R.rsi);
             break;
+/** Project 3-Memory Mapped FIles */
+#ifdef VM
+        case SYS_MMAP:
+            f->R.rax = mmap(f->R.rdi, f->R.rsi, f->R.rdx, f->R.r10, f->R.r8);
+            break;
+#endif
         default:
             exit(-1);
     }
@@ -378,3 +384,28 @@ int dup2(int oldfd, int newfd) {
 
     return newfd;
 }
+
+/** Project 3-Memory Mapped FIles */
+#ifdef VM
+void *mmap(void *addr, size_t length, int writable, int fd, off_t offset) {
+    if (!addr || pg_round_down(addr) != addr || is_kernel_vaddr(addr) || is_kernel_vaddr(addr + length))
+        return NULL;
+
+    if (offset != pg_round_down(offset) || offset % PGSIZE != 0)
+        return NULL;
+
+    if (spt_find_page(&thread_current()->spt, addr))
+        return NULL;
+
+    struct file *file = process_get_file(fd);
+
+    if ((file >= STDIN && file <= STDERR) || file == NULL)
+        return NULL;
+
+    if (file_length(file) == 0 || (long)length <= 0)
+        return NULL;
+
+    return do_mmap(addr, length, writable, file, offset);
+}
+
+#endif
