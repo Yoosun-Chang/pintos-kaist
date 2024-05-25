@@ -129,4 +129,8 @@ enum vm_type page_get_type (struct page *page);
 uint64_t page_hash(const struct hash_elem *e, void *aux);
 bool page_less(const struct hash_elem *a, const struct hash_elem *b, void *aux);
 void hash_page_destroy(struct hash_elem *e, void *aux);
+
+/** Project 3-Stack Growth*/
+#define STACK_LIMIT (USER_STACK - (1 << 20))  
+
 #endif  /* VM_VM_H */
