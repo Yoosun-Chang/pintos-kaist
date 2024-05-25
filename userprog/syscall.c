@@ -229,7 +229,12 @@ read(int fd, void *buffer, unsigned length)
 {
     struct thread *curr = thread_current();
     check_address(buffer);
-
+/** #project3-Stack Growth */
+#ifdef VM
+    struct page *page = spt_find_page(&thread_current()->spt, buffer);
+    if (page && !page->writable)
+        exit(-1);
+#endif
     struct file *file = process_get_file(fd);
 
     if (file == STDIN) { 
