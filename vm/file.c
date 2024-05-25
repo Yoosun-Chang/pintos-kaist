@@ -101,4 +101,16 @@ err:
 /* Do the munmap */
 void
 do_munmap (void *addr) {
+	/** Project 3-Memory Mapped FIles */
+    struct thread *curr = thread_current();
+    struct page *page;
+
+    lock_acquire(&filesys_lock);
+    while ((page = spt_find_page(&curr->spt, addr))) {
+        if (page)
+            destroy(page);
+
+        addr += PGSIZE;
+    }
+    lock_release(&filesys_lock);
 }
