@@ -144,7 +144,7 @@ struct page *check_address(void *addr) {
 
 /** Project 3-Memory Mapped Files 버퍼 유효성 검사 */
 void check_valid_buffer(void *buffer, size_t size, bool writable) {
-    for (size_t i = 0; i < size; i ++) {
+    for (size_t i = 0; i < size; i +=8) {
         /* buffer가 spt에 존재하는지 검사 */
         struct page *page = check_address(buffer + i);
 
