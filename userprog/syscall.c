@@ -141,6 +141,17 @@ struct page *check_address(void *addr) {
 
     return spt_find_page(&curr->spt, addr);
 }
+
+/** Project 3-Memory Mapped Files 버퍼 유효성 검사 */
+void check_valid_buffer(void *buffer, size_t size, bool writable) {
+    for (size_t i = 0; i < size; i += 8) {
+        /* buffer가 spt에 존재하는지 검사 */
+        struct page *page = check_address(buffer + i);
+
+        if (!page || (writable && !(page->writable)))
+            exit(-1);
+    }
+}
 #endif
 
 void 
@@ -252,14 +263,11 @@ filesize(int fd) {
 int 
 read(int fd, void *buffer, unsigned length) 
 {
-    struct thread *curr = thread_current();
-    check_address(buffer);
-/** #project3-Stack Growth */
 #ifdef VM
-    struct page *page = spt_find_page(&thread_current()->spt, buffer);
-    if (page && !page->writable)
-        exit(-1);
+    check_valid_buffer(buffer, length, true);
 #endif
+    check_address(buffer);
+    
     struct file *file = process_get_file(fd);
 
     if (file == STDIN) { 
@@ -276,7 +284,7 @@ read(int fd, void *buffer, unsigned length)
         return i;
     }
 
-    if (file == NULL || file == STDOUT || file == STDERR)  // 빈 파일, stdout, stderr를 읽으려고 할 경우
+    if (file == NULL || file == STDOUT || file == STDERR)  
         return -1;
 
     off_t bytes = -1;
@@ -292,32 +300,29 @@ read(int fd, void *buffer, unsigned length)
 int 
 write(int fd, const void *buffer, unsigned length) 
 {
+#ifdef VM
+    check_valid_buffer(buffer, length, false);
+#endif
     check_address(buffer);
 
-    struct thread *curr = thread_current();
+    lock_acquire(&filesys_lock);
     off_t bytes = -1;
 
     struct file *file = process_get_file(fd);
 
     if (file == STDIN || file == NULL)  
-        return -1;
+        goto done;
 
-    if (file == STDOUT) { 
-
+    if (file == STDOUT || file == STDERR) {  
         putbuf(buffer, length);
-        return length;
+        bytes = length;
+        goto done;
     }
 
-    if (file == STDERR) { 
-
-        putbuf(buffer, length);
-        return length;
-    }
-
-    lock_acquire(&filesys_lock);
     bytes = file_write(file, buffer, length);
-    lock_release(&filesys_lock);
 
+done:
+    lock_release(&filesys_lock);
     return bytes;
 }
 
