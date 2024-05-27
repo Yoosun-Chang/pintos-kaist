@@ -61,6 +61,8 @@ struct page {
 	/** Project 3-Memory Management */
 	struct hash_elem hash_elem;
 	bool writable;
+	/** Project 3-Copy On Write */
+	bool accessible;
 };
 
 /* The representation of "frame" */
