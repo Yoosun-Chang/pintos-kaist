@@ -148,7 +148,7 @@ void check_valid_buffer(void *buffer, size_t size, bool writable) {
         /* buffer가 spt에 존재하는지 검사 */
         struct page *page = check_address(buffer + i);
 
-        if (!page || (writable && !(page->writable)))
+        if (!page || (writable && !(page->accessible))) /** Project 3-Copy On Write */
             exit(-1);
     }
 }
@@ -165,6 +165,8 @@ exit(int status)
 {
     struct thread *t = thread_current();
     t->exit_status = status;
+    if(status<0)
+        PANIC("dd");
     printf("%s: exit(%d)\n", t->name, t->exit_status); // Process Termination Message
     thread_exit();
 }
