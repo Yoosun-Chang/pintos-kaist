@@ -214,37 +214,31 @@ vm_handle_wp (struct page *page UNUSED) {
 bool
 vm_try_handle_fault (struct intr_frame *f UNUSED, void *addr UNUSED,
 		bool user UNUSED, bool write UNUSED, bool not_present UNUSED) {
-	struct supplemental_page_table *spt UNUSED = &thread_current ()->spt;
-
-	/** Project 3-Anonymous Page */
-	struct page *page = NULL;
+			
+    struct supplemental_page_table *spt UNUSED = &thread_current()->spt;
+	/** Project 3-Copy On Write */
+    struct page *page = spt_find_page(&thread_current()->spt, addr);
 
     if (addr == NULL || is_kernel_vaddr(addr))
         return false;
 
-    if (not_present)
-    {
-		/** Project 3-Stack Growth*/
-		void *rsp = user ?  f->rsp : thread_current()->stack_pointer;
+    if (!not_present && write)
+        return vm_handle_wp(page);
+
+    if (!page) {
+        void *rsp = user ? f->rsp : thread_current()->stack_pointer;
 		if (STACK_LIMIT <= rsp - 8 && rsp - 8 == addr && addr <= USER_STACK){
-			vm_stack_growth(addr);
+			vm_stack_growth(thread_current()->stack_bottom - PGSIZE);
 			return true;
 		}
 		else if (STACK_LIMIT <= rsp && rsp <= addr && addr <= USER_STACK){
-			vm_stack_growth(addr);
+			vm_stack_growth(thread_current()->stack_bottom - PGSIZE);
 			return true;
 		}
-		page = spt_find_page(spt, addr);
-		/** Project 3-Copy On Write */
-		if (!page)
-			return false;
-		if (write && !page->writable)
-			return vm_handle_wp(page);
-
-		
-		return vm_do_claim_page(page);
+        return false;
     }
-    return false;
+
+    return vm_do_claim_page(page);  
 }
 
 /* Free the page.
