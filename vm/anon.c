@@ -56,6 +56,22 @@ anon_swap_in (struct page *page, void *kva) {
 static bool
 anon_swap_out (struct page *page) {
 	struct anon_page *anon_page = &page->anon;
+	/** Project 3-Swap In/Out */
+	lock_acquire(&swap_lock);
+	size_t page_no = bitmap_scan_and_flip(swap_bitmap, 0, 1, false);
+
+	if (page_no == BITMAP_ERROR){
+		lock_release(&swap_lock);
+		return false;
+	}
+
+	for (size_t i = 0; i < SECTOR_PER_PAGE; i++)
+		disk_write(swap_disk, (page_no * SECTOR_PER_PAGE) + i, page->va + (i * DISK_SECTOR_SIZE));
+	anon_page->page_no = page_no;
+	page->frame->page = NULL;
+	page->frame = NULL;
+	pml4_clear_page(thread_current()->pml4, page->va);
+	lock_release(&swap_lock);
 }
 
 /* Destroy the anonymous page. PAGE will be freed by the caller. */
