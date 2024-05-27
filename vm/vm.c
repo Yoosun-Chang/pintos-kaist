@@ -85,7 +85,7 @@ vm_alloc_page_with_initializer (enum vm_type type, void *upage, bool writable,
 
 		uninit_new(page, upage, init, type, aux, initializer);
 		page->writable = writable;
-		page->accessible = writable;
+		page->accessible = writable; /** Project 3-Copy On Write */
 		return spt_insert_page(spt, page);
 	}
 err:
@@ -308,11 +308,15 @@ supplemental_page_table_copy (struct supplemental_page_table *dst UNUSED,
             if (!vm_alloc_page(type, upage, writable)) 
                 return false;
 
-            if (!vm_claim_page(upage))  
-                return false;
+			/** Project 3-Copy On Write */
+            // if (!vm_claim_page(upage))  
+            //     return false;
 
-            struct page *dst_page = spt_find_page(dst, upage); 
-            memcpy(dst_page->frame->kva, src_page->frame->kva, PGSIZE);
+            // struct page *dst_page = spt_find_page(dst, upage); 
+            // memcpy(dst_page->frame->kva, src_page->frame->kva, PGSIZE);
+
+			if (!vm_copy_claim_page(dst, upage, src_page->frame->kva, writable)) 
+                return false;
         }
     }
 
