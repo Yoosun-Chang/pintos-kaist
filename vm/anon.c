@@ -100,4 +100,14 @@ anon_swap_out (struct page *page) {
 static void
 anon_destroy (struct page *page) {
 	struct anon_page *anon_page = &page->anon;
+	/** Project 3-Swap In/Out */
+    if (anon_page->page_no != BITMAP_ERROR)
+        bitmap_reset(swap_bitmap, anon_page->page_no);
+
+    if (page->frame) {
+        list_remove(&page->frame->frame_elem);
+        page->frame->page = NULL;
+        free(page->frame);
+        page->frame = NULL;
+    }
 }
