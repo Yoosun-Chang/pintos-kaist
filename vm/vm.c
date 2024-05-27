@@ -210,15 +210,19 @@ vm_try_handle_fault (struct intr_frame *f UNUSED, void *addr UNUSED,
     {
 		/** Project 3-Stack Growth*/
 		void *rsp = user ?  f->rsp : thread_current()->stack_pointer;
-		if (STACK_LIMIT <= rsp - 8 && rsp - 8 == addr && addr <= USER_STACK)
+		if (STACK_LIMIT <= rsp - 8 && rsp - 8 == addr && addr <= USER_STACK){
 			vm_stack_growth(addr);
-		else if (STACK_LIMIT <= rsp && rsp <= addr && addr <= USER_STACK)
+			return true;
+		}
+		else if (STACK_LIMIT <= rsp && rsp <= addr && addr <= USER_STACK){
 			vm_stack_growth(addr);
-
+			return true;
+		}
 		page = spt_find_page(spt, addr);
 
 		if (!page || (write && !page->writable))
 			return false;
+		
 		return vm_do_claim_page(page);
     }
     return false;
