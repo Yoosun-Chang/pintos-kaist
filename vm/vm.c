@@ -10,6 +10,7 @@ static struct list frame_table;
 
 /** Project 3-Swap In/Out */
 struct lock frame_lock;
+struct list_elem *next = NULL;
 
 /* Initializes the virtual memory subsystem by invoking each subsystem's
  * intialize codes. */
@@ -124,11 +125,21 @@ spt_remove_page (struct supplemental_page_table *spt, struct page *page) {
 static struct frame *
 vm_get_victim (void) {
 	struct frame *victim = NULL;
-	 /* TODO: The policy for eviction is up to you. */
-
+	/** Project 3-Swap In/Out */
+	lock_acquire(&frame_lock);
+	for (next = list_begin(&frame_table); next != list_end(&frame_table); next = list_next(next))
+	{
+		victim = list_entry(next, struct frame, frame_elem);
+		if (pml4_is_accessed(thread_current()->pml4, victim->page->va))
+			pml4_set_accessed(thread_current()->pml4, victim->page->va, false);
+		else{
+			lock_release(&frame_lock);
+			return victim;
+		}
+	}
+	lock_release(&frame_lock);
 	return victim;
 }
-
 /* Evict one page and return the corresponding frame.
  * Return NULL on error.*/
 static struct frame *
