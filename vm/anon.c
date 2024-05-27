@@ -2,7 +2,6 @@
 
 #include "vm/vm.h"
 #include "devices/disk.h"
-
 /* DO NOT MODIFY BELOW LINE */
 static struct disk *swap_disk;
 static bool anon_swap_in (struct page *page, void *kva);
@@ -23,6 +22,9 @@ static const struct page_operations anon_ops = {
 #define SECTOR_PER_PAGE (PGSIZE / DISK_SECTOR_SIZE)
 static struct bitmap *swap_bitmap;
 static struct lock swap_lock;
+
+/** Project 3-Copy On Write */
+#include "include/threads/mmu.h"
 
 /* Initialize the data for anonymous pages */
 void
@@ -112,4 +114,5 @@ anon_destroy (struct page *page) {
         free(page->frame);
         page->frame = NULL;
     }
+	pml4_clear_page(thread_current()->pml4, page->va); /** Project 3-Copy On Write */
 }
