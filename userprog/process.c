@@ -22,6 +22,8 @@
 #include "vm/vm.h"
 #endif
 
+/** Project 3-Memory Mapped FIles */
+#include "userprog/syscall.h"
 
 static void process_cleanup (void);
 static bool load (const char *file_name, struct intr_frame *if_);
@@ -430,6 +432,7 @@ load (const char *file_name, struct intr_frame *if_) {
     process_activate(thread_current());
 
     /* Open executable file. */
+    lock_acquire(&filesys_lock); /** Project 3-Memory Mapped FIles */
     file = filesys_open(file_name);
     if (file == NULL) {
         printf("load: %s: open failed\n", file_name);
@@ -509,7 +512,7 @@ load (const char *file_name, struct intr_frame *if_) {
 done:
     /* We arrive here whether the load is successful or not. */
     // file_close(file);
-
+    lock_release(&filesys_lock); /** Project 3-Memory Mapped FIles */
     return success;
 }
 
