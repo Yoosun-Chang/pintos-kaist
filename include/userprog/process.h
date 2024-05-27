@@ -10,4 +10,23 @@ int process_wait (tid_t);
 void process_exit (void);
 void process_activate (struct thread *next);
 
+/** project2-Command Line Parsing */
+void argument_stack(char **argv, int argc, struct intr_frame *if_);
+
+/** project2-System Call */
+struct thread *get_child_process(int pid);
+int process_add_file(struct file *f);
+struct file *process_get_file(int fd);
+int process_close_file(int fd);
+
+/** Project 2-Extend File Descriptor */
+process_insert_file(int fd, struct file *f);
+
+/** #Project 3: Memory Mapped Files */
+bool lazy_load_segment(struct page *page, void *aux);
+
+#define STDIN 1
+#define STDOUT 2
+#define STDERR 3
+
 #endif /* userprog/process.h */
