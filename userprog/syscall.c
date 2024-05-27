@@ -165,8 +165,6 @@ exit(int status)
 {
     struct thread *t = thread_current();
     t->exit_status = status;
-    if(status<0)
-        PANIC("dd");
     printf("%s: exit(%d)\n", t->name, t->exit_status); // Process Termination Message
     thread_exit();
 }
