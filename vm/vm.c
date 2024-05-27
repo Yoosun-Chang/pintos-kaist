@@ -8,6 +8,9 @@
 #include "threads/mmu.h"
 static struct list frame_table; 
 
+/** Project 3-Swap In/Out */
+struct lock frame_lock;
+
 /* Initializes the virtual memory subsystem by invoking each subsystem's
  * intialize codes. */
 void
@@ -22,6 +25,9 @@ vm_init (void) {
 
 	/** Project 3-Memory Management */
 	list_init(&frame_table);
+	
+	/** Project 3-Swap In/Out */
+	lock_init(&frame_lock);
 }
 
 /* Get the type of the page. This function is useful if you want to know the
