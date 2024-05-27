@@ -105,7 +105,9 @@ anon_destroy (struct page *page) {
         bitmap_reset(swap_bitmap, anon_page->page_no);
 
     if (page->frame) {
+		lock_acquire(&swap_lock);
         list_remove(&page->frame->frame_elem);
+		lock_release(&swap_lock);
         page->frame->page = NULL;
         free(page->frame);
         page->frame = NULL;
