@@ -36,10 +36,14 @@ vm_anon_init (void) {
 /* Initialize the file mapping */
 bool
 anon_initializer (struct page *page, enum vm_type type, void *kva) {
-	/* Set up the handler */
+	/** Project 3-Swap In/Out */
+	struct uninit_page *uninit = &page->uninit;
+	memset(uninit, 0, sizeof(struct uninit_page));
 	page->operations = &anon_ops;
-
+	
 	struct anon_page *anon_page = &page->anon;
+	anon_page->page_no = BITMAP_ERROR;
+	return true;
 }
 
 /* Swap in the page by read contents from the swap disk. */
