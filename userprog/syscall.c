@@ -148,7 +148,7 @@ void check_valid_buffer(void *buffer, size_t size, bool writable) {
         /* buffer가 spt에 존재하는지 검사 */
         struct page *page = check_address(buffer + i);
 
-        if (!page || (writable && !(page->accessible))) /** Project 3-Copy On Write */
+        if (!page || (writable && !(page->writable))) /** Project 3-Copy On Write */
             exit(-1);
     }
 }
