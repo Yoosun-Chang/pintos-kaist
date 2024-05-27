@@ -220,8 +220,11 @@ vm_try_handle_fault (struct intr_frame *f UNUSED, void *addr UNUSED,
 		}
 		page = spt_find_page(spt, addr);
 
-		if (!page || (write && !page->writable))
+		/** Project 3-Copy On Write */
+		if (!page)
 			return false;
+		if (write && !page->writable)
+			return vm_handle_wp(page);
 		
 		return vm_do_claim_page(page);
     }
