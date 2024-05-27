@@ -50,6 +50,28 @@ anon_initializer (struct page *page, enum vm_type type, void *kva) {
 static bool
 anon_swap_in (struct page *page, void *kva) {
 	struct anon_page *anon_page = &page->anon;
+	/** Project 3-Swap In/Out */
+	lock_acquire(&swap_lock);
+	if (anon_page->page_no == BITMAP_ERROR){
+		lock_release(&swap_lock);	
+		return false;
+	}
+
+
+	if (!bitmap_test(swap_bitmap, anon_page->page_no)){
+		lock_release(&swap_lock);	
+		return false;
+	}
+
+	for (size_t i = 0; i < SECTOR_PER_PAGE; i++)
+		disk_read(swap_disk, (anon_page->page_no * SECTOR_PER_PAGE) + i, kva + (i * DISK_SECTOR_SIZE));
+
+	bitmap_set(swap_bitmap, anon_page->page_no, false);
+
+	lock_release(&swap_lock);
+	anon_page->page_no = BITMAP_ERROR;
+
+	return true;
 }
 
 /* Swap out the page by writing contents to the swap disk. */
