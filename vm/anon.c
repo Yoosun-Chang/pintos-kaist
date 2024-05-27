@@ -27,8 +27,10 @@ static struct lock swap_lock;
 /* Initialize the data for anonymous pages */
 void
 vm_anon_init (void) {
-	/* TODO: Set up the swap_disk. */
-	swap_disk = NULL;
+	/** Project 3-Swap In/Out */
+	swap_disk = disk_get(1, 1);
+	swap_bitmap = bitmap_create(disk_size(swap_disk) / SECTOR_PER_PAGE);
+	lock_init(&swap_lock);
 }
 
 /* Initialize the file mapping */
