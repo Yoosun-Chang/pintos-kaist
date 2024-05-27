@@ -17,6 +17,13 @@ static const struct page_operations anon_ops = {
 	.type = VM_ANON,
 };
 
+/** Project 3-Swap In/Out */
+#include <bitmap.h>
+#include "threads/vaddr.h"
+#define SECTOR_PER_PAGE (PGSIZE / DISK_SECTOR_SIZE)
+static struct bitmap *swap_bitmap;
+static struct lock swap_lock;
+
 /* Initialize the data for anonymous pages */
 void
 vm_anon_init (void) {
