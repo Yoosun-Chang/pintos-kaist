@@ -135,4 +135,6 @@ void hash_page_destroy(struct hash_elem *e, void *aux);
 /** Project 3-Stack Growth*/
 #define STACK_LIMIT (USER_STACK - (1 << 20))  
 
+/** Project 3-Copy On Write */
+static bool vm_copy_claim_page(struct supplemental_page_table *dst, void *va, void *kva, bool writable);
 #endif  /* VM_VM_H */

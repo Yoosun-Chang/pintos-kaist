@@ -236,6 +236,34 @@ vm_dealloc_page (struct page *page) {
 	free (page);
 }
 
+/** Project 3-Copy On Write */
+static bool 
+vm_copy_claim_page(struct supplemental_page_table *dst, void *va, void *kva, bool writable) {
+    struct page *page = spt_find_page(dst, va);
+
+    if (page == NULL)
+        return false;
+
+    struct frame *frame = (struct frame *)malloc(sizeof(struct frame));
+
+    if (!frame)
+        return false;
+
+    page->accessible = writable; 
+    frame->page = page;
+    page->frame = frame;
+    frame->kva = kva;
+
+    if (!pml4_set_page(thread_current()->pml4, page->va, frame->kva, false)) {
+        free(frame);
+        return false;
+    }
+
+    list_push_back(&frame_table, &frame->frame_elem); 
+
+    return swap_in(page, frame->kva);
+}
+
 /* Claim the page that allocate on VA. */
 bool
 vm_claim_page (void *va UNUSED) {
