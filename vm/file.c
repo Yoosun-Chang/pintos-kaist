@@ -107,7 +107,7 @@ do_mmap (void *addr, size_t length, int writable,
     ASSERT(pg_ofs(addr) == 0);
     ASSERT(offset % PGSIZE == 0);
 
-    struct aux *aux;
+    struct vm_load_arg *aux;
     while (read_bytes > 0 || zero_bytes > 0) {
         size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE;
         size_t page_zero_bytes = PGSIZE - page_read_bytes;
@@ -134,6 +134,7 @@ do_mmap (void *addr, size_t length, int writable,
 
 err:
     free(aux);
+	lock_release(&filesys_lock);
     return NULL;
 }
 
